@@ -1,0 +1,608 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task History &amp; Evaluation | Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+            --success:#10b981; --danger:#ef4444; --warning:#f59e0b;
+            --purple:#7c3aed; --purple-light:#f5f3ff;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        /* ── Sidebar ── */
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:.58rem;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:.58rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#64748b;font-weight:600;font-size:.82rem;text-decoration:none;transition:all .15s;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+        .nav-item.active{background:var(--primary);color:white;}
+        .nav-item i{font-size:.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:.78rem;font-weight:700;color:white;}
+        .user-role{font-size:.63rem;color:#475569;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
+
+        /* ── Main ── */
+        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .topbar-count{margin-left:auto;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.75rem;font-weight:700;}
+        .page-content{padding:22px 26px;}
+
+        /* ── Stat Cards ── */
+        .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
+        .stat-card{background:white;border-radius:12px;padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px;animation:fadeUp .3s ease both;}
+        .stat-card:nth-child(1){animation-delay:.05s}
+        .stat-card:nth-child(2){animation-delay:.10s}
+        .stat-card:nth-child(3){animation-delay:.15s}
+        .stat-card:nth-child(4){animation-delay:.20s}
+        .stat-icon{width:40px;height:40px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+        .si-blue{background:#eff6ff;color:var(--primary);}
+        .si-green{background:#ecfdf5;color:var(--success);}
+        .si-amber{background:#fffbeb;color:var(--warning);}
+        .si-red{background:#fef2f2;color:var(--danger);}
+        .si-purple{background:var(--purple-light);color:var(--purple);}
+        .stat-value{font-size:1.5rem;font-weight:800;line-height:1;font-family:'Fraunces',serif;}
+        .stat-label{font-size:.7rem;color:var(--text-muted);font-weight:600;margin-top:2px;}
+
+        /* ── Filter Bar ── */
+        .filter-bar{background:white;border-radius:12px;border:1px solid var(--border);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;animation:fadeUp .3s ease .25s both;}
+        .filter-search{flex:1;min-width:180px;position:relative;}
+        .filter-search i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.82rem;pointer-events:none;}
+        .filter-search input{width:100%;padding:8px 11px 8px 34px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:.82rem;font-weight:500;outline:none;color:var(--text);transition:border-color .15s,box-shadow .15s;}
+        .filter-search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+        .filter-select{padding:8px 11px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:.82rem;font-weight:600;outline:none;color:var(--text);background:white;cursor:pointer;transition:border-color .15s;}
+        .filter-select:focus{border-color:var(--primary);}
+        .btn-filter{padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s;}
+        .btn-filter:hover{background:var(--primary-dark);}
+        .btn-clear{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--text-muted);font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;text-decoration:none;transition:all .15s;}
+        .btn-clear:hover{border-color:var(--danger);color:var(--danger);background:#fef2f2;}
+
+        /* Evaluation insight */
+        .insight-card{background:white;border-radius:12px;border:1px solid var(--border);padding:14px 18px;margin-bottom:16px;display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:16px;align-items:center;animation:fadeUp .3s ease .22s both;}
+        .insight-title-wrap{display:flex;align-items:center;gap:11px;min-width:0;}
+        .insight-icon{width:38px;height:38px;border-radius:10px;background:var(--purple-light);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+        .insight-title{font-size:.84rem;font-weight:800;color:var(--text);}
+        .insight-sub{font-size:.7rem;color:var(--text-muted);font-weight:600;margin-top:2px;}
+        .insight-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .insight-metric{border:1px solid var(--border);border-radius:10px;background:#f8fafc;padding:10px 12px;display:flex;align-items:center;gap:10px;min-width:0;}
+        .metric-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0;}
+        .metric-support{background:var(--purple-light);color:var(--purple);}
+        .metric-feeling{background:#ecfdf5;color:#059669;}
+        .metric-label{font-size:.64rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+        .metric-value{font-size:.78rem;font-weight:800;color:var(--text);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .insight-empty{grid-column:1/-1;border:1px dashed var(--border);border-radius:10px;background:#f8fafc;padding:12px;font-size:.78rem;font-weight:700;color:var(--text-muted);display:flex;align-items:center;gap:8px;}
+
+        /* ── Status Tabs ── */
+        .status-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+        .status-tab{padding:6px 14px;border-radius:20px;font-size:.75rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--text-muted);text-decoration:none;transition:all .15s;display:flex;align-items:center;gap:5px;}
+        .status-tab:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+        .status-tab.active-all{background:#0f172a;color:white;border-color:#0f172a;}
+        .status-tab.active-completed{background:var(--success);color:white;border-color:var(--success);}
+        .status-tab.active-pending{background:var(--warning);color:white;border-color:var(--warning);}
+        .status-tab.active-overdue{background:var(--danger);color:white;border-color:var(--danger);}
+
+        /* ── Table ── */
+        .table-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;animation:fadeUp .3s ease .3s both;}
+        .table-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+        .table-head-icon{width:28px;height:28px;border-radius:7px;background:var(--purple-light);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+        .table-head-title{font-size:.85rem;font-weight:800;}
+        .table-head-count{margin-left:auto;font-size:.72rem;color:var(--text-muted);font-weight:700;}
+
+        table{width:100%;border-collapse:collapse;}
+        thead th{padding:10px 16px;background:#f8fafc;font-size:.65rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+        tbody tr{border-bottom:1px solid #f1f5f9;transition:background .12s;}
+        tbody tr:hover{background:#f8fafc;}
+        tbody tr:last-child{border-bottom:none;}
+        tbody td{padding:11px 16px;font-size:.81rem;vertical-align:middle;}
+
+        /* ── Student Cell ── */
+        .student-cell{display:flex;align-items:center;gap:9px;}
+        .s-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0;overflow:hidden;}
+        .s-avatar img{width:100%;height:100%;object-fit:cover;}
+        .s-name{font-weight:700;color:var(--text);white-space:nowrap;max-width:112px;overflow:hidden;text-overflow:ellipsis;}
+        .s-link{font-size:.7rem;color:var(--primary);text-decoration:none;font-weight:600;}
+        .s-link:hover{text-decoration:underline;}
+
+        /* ── Task cell ── */
+        .task-title-cell{font-weight:700;color:var(--text);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .task-desc-cell{font-size:.7rem;color:var(--text-muted);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+        /* ── Badges ── */
+        .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.66rem;font-weight:700;white-space:nowrap;}
+        .badge-green{background:#ecfdf5;color:#065f46;}
+        .badge-amber{background:#fffbeb;color:#92400e;}
+        .badge-red{background:#fef2f2;color:#991b1b;}
+
+        /* ── Action buttons ── */
+        .act-btns{display:flex;gap:5px;}
+        .act-btn{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;font-size:.74rem;text-decoration:none;color:var(--text-muted);cursor:pointer;transition:all .15s;}
+        .act-btn.view:hover{border-color:#bfdbfe;background:var(--primary-light);color:var(--primary);}
+        .act-btn.edit:hover{border-color:#fde68a;background:#fffbeb;color:#d97706;}
+        .act-btn.del:hover{border-color:#fecaca;background:#fef2f2;color:var(--danger);}
+        .act-btn.eval:hover{border-color:#ddd6fe;background:var(--purple-light);color:var(--purple);}
+
+        .eval-summary{display:grid;gap:10px;text-align:left;margin-top:6px;}
+        .eval-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:#f8fafc;}
+        .eval-label{font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+        .eval-value{font-size:.86rem;font-weight:800;color:var(--text);text-align:right;}
+        .eval-stars{color:#f59e0b;font-size:1rem;letter-spacing:1px;}
+
+        /* ── Empty ── */
+        .empty-state{padding:52px 24px;text-align:center;}
+        .empty-state i{font-size:2.4rem;opacity:.15;display:block;margin-bottom:10px;}
+        .empty-state p{font-size:.82rem;font-weight:600;color:var(--text-muted);}
+
+        /* ── Modals ── */
+        .modal-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+        .modal-overlay.show{display:flex;}
+        .modal-box{background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:modalIn .2s ease;}
+        @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+        .modal-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto 12px;}
+        .modal-title{font-size:.95rem;font-weight:800;text-align:center;margin-bottom:5px;}
+        .modal-msg{font-size:.8rem;color:var(--text-muted);text-align:center;margin-bottom:20px;line-height:1.6;}
+        .modal-actions{display:flex;gap:10px;}
+        .modal-cancel{flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);}
+        .modal-cancel:hover{background:#f8fafc;}
+        .modal-confirm-danger{flex:1;padding:9px;border-radius:8px;border:none;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;}
+        .modal-confirm-danger:hover{background:#dc2626;}
+        .eval-modal{max-width:430px;}
+        .eval-meta{font-size:.76rem;color:var(--text-muted);font-weight:700;text-align:center;margin-bottom:14px;}
+        .eval-empty{padding:14px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);font-size:.82rem;font-weight:700;color:var(--text-muted);text-align:center;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+        @media(max-width:1100px){.stats-grid{grid-template-columns:1fr 1fr 1fr;}}
+        @media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr;}.insight-card{grid-template-columns:1fr;}.insight-metrics{grid-template-columns:1fr;}}
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%);}
+            .main{margin-left:0;}
+            .stats-grid{grid-template-columns:1fr 1fr;}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Learning Management System</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="{% url 'dashboard' %}" class="nav-item"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">Management</div>
+        <a href="{% url 'student_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> Students</a>
+        <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'teacher_feedback' %}" class="nav-item"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
+        <div class="nav-label">Tasks</div>
+        <a href="{% url 'assign_task' %}" class="nav-item"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
+        <a href="{% url 'task_history' %}" class="nav-item active"><i class="bi bi-journal-text"></i> Task History &amp; Evaluation</a>
+        <div class="nav-label">Monitoring</div>
+        <a href="{% url 'student_monitoring' %}" class="nav-item"><i class="bi bi-activity"></i> Activity Monitor</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">{{ user.username|first|upper }}</div>
+            <div>
+                <div class="user-name">{{ user.username }}</div>
+                <div class="user-role">Teacher</div>
+            </div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn">
+            <i class="bi bi-box-arrow-left"></i> Sign Out
+        </a>
+    </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+    <div class="topbar">
+        <div class="topbar-title">Task History &amp; Evaluation</div>
+        <div class="topbar-count">{{ total }} task{{ total|pluralize }}</div>
+    </div>
+
+    <div class="page-content">
+
+        {% if messages %}
+        <div style="margin-bottom:14px;">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
+                 role="alert" style="font-size:.83rem;border-radius:10px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon si-blue"><i class="bi bi-journal-text"></i></div>
+                <div><div class="stat-value">{{ total }}</div><div class="stat-label">Total Tasks</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-green"><i class="bi bi-check-circle-fill"></i></div>
+                <div><div class="stat-value">{{ completed }}</div><div class="stat-label">Completed</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-amber"><i class="bi bi-clock-fill"></i></div>
+                <div><div class="stat-value">{{ pending }}</div><div class="stat-label">Pending</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-red"><i class="bi bi-exclamation-circle-fill"></i></div>
+                <div><div class="stat-value">{{ overdue }}</div><div class="stat-label">Overdue</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-purple"><i class="bi bi-clipboard-data-fill"></i></div>
+                <div><div class="stat-value">{{ evaluated }}</div><div class="stat-label">Evaluated</div></div>
+            </div>
+        </div>
+
+        <div class="insight-card">
+            <div class="insight-title-wrap">
+                <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                <div>
+                    <div class="insight-title">Evaluation Insight</div>
+                    <div class="insight-sub">Quick read from submitted evaluations</div>
+                </div>
+            </div>
+            <div class="insight-metrics">
+                {% if evaluated %}
+                <div class="insight-metric">
+                    <div class="metric-icon metric-support"><i class="bi bi-person-check-fill"></i></div>
+                    <div style="min-width:0;">
+                        <div class="metric-label">Most Common Support</div>
+                        <div class="metric-value" title="{{ common_effort }}">{{ common_effort }}</div>
+                    </div>
+                </div>
+                <div class="insight-metric">
+                    <div class="metric-icon metric-feeling"><i class="bi bi-emoji-smile-fill"></i></div>
+                    <div style="min-width:0;">
+                        <div class="metric-label">Most Common Feeling</div>
+                        <div class="metric-value" title="{{ common_feeling }}">{{ common_feeling }}</div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="insight-empty">
+                    <i class="bi bi-info-circle-fill"></i>
+                    No submitted evaluations yet. Insights will appear after students complete the evaluation form.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <form method="get" class="filter-bar">
+            <div class="filter-search">
+                <i class="bi bi-search"></i>
+                <input type="text" name="q" value="{{ search_filter }}"
+                       placeholder="Search task or student name…" autocomplete="off">
+            </div>
+            <select name="student" class="filter-select">
+                <option value="">All Students</option>
+                {% for s in students %}
+                <option value="{{ s.id }}" {% if student_filter == s.id|stringformat:"s" %}selected{% endif %}>
+                    {{ s.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-filter">
+                <i class="bi bi-funnel-fill"></i> Filter
+            </button>
+            {% if search_filter or status_filter or student_filter %}
+            <a href="{% url 'task_history' %}" class="btn-clear">
+                <i class="bi bi-x-circle"></i> Clear
+            </a>
+            {% endif %}
+        </form>
+
+        <!-- Status Tabs -->
+        <div class="status-tabs">
+            <a href="?q={{ search_filter }}&student={{ student_filter }}"
+               class="status-tab {% if not status_filter %}active-all{% endif %}">
+                <i class="bi bi-list-ul"></i> All
+            </a>
+            <a href="?q={{ search_filter }}&student={{ student_filter }}&status=completed"
+               class="status-tab {% if status_filter == 'completed' %}active-completed{% endif %}">
+                <i class="bi bi-check-circle-fill"></i> Completed
+            </a>
+            <a href="?q={{ search_filter }}&student={{ student_filter }}&status=pending"
+               class="status-tab {% if status_filter == 'pending' %}active-pending{% endif %}">
+                <i class="bi bi-clock-fill"></i> Pending
+            </a>
+            <a href="?q={{ search_filter }}&student={{ student_filter }}&status=overdue"
+               class="status-tab {% if status_filter == 'overdue' %}active-overdue{% endif %}">
+                <i class="bi bi-exclamation-circle-fill"></i> Overdue
+            </a>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            <div class="table-head">
+                <div class="table-head-icon"><i class="bi bi-journal-text"></i></div>
+                <div class="table-head-title">
+                    {% if status_filter == 'completed' %}Completed Tasks
+                    {% elif status_filter == 'pending' %}Pending Tasks
+                    {% elif status_filter == 'overdue' %}Overdue Tasks
+                    {% else %}All Tasks{% endif %}
+                </div>
+                <div class="table-head-count">{{ tasks|length }} result{{ tasks|length|pluralize }}</div>
+            </div>
+
+            {% if tasks %}
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Task</th>
+                            <th>Date Created</th>
+                            <th>Deadline</th>
+                            <th>Status</th>
+                            <th>Completed On</th>
+                            <th>Evaluation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td style="color:var(--text-muted);font-weight:700;font-size:.72rem;">{{ forloop.counter }}</td>
+
+                            <!-- Student -->
+                            <td>
+                                <div class="student-cell">
+                                    <div class="s-avatar">
+                                        {% if task.student.profile_picture %}
+                                            <img src="{{ task.student.profile_picture.url }}" alt="{{ task.student.name }}">
+                                        {% else %}
+                                            {{ task.student.name|first|upper }}
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="s-name" title="{{ task.student.name }}">{{ task.student.name|abbreviate_name }}</div>
+                                        <a href="{% url 'student_detail' task.student.id %}" class="s-link">
+                                            View profile →
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Task -->
+                            <td>
+                                <div class="task-title-cell">{{ task.title }}</div>
+                                {% if task.description %}
+                                <div class="task-desc-cell">{{ task.description|truncatechars:45 }}</div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Date Created -->
+                            <td style="color:var(--text-muted);white-space:nowrap;">
+                                {{ task.created_at|date:"M d, Y" }}
+                            </td>
+
+                            <!-- Deadline -->
+                            <td style="white-space:nowrap;">
+                                <span style="font-weight:600;{% if task.status != 'completed' and task.deadline < now %}color:var(--danger);{% else %}color:var(--text-muted);{% endif %}">
+                                    {{ task.deadline|date:"M d, Y" }}
+                                </span>
+                            </td>
+
+                            <!-- Status -->
+                            <td>
+                                {% if task.status == 'completed' %}
+                                    <span class="badge badge-green"><i class="bi bi-check-circle-fill"></i> Completed</span>
+                                {% elif task.deadline < now %}
+                                    <span class="badge badge-red"><i class="bi bi-exclamation-circle-fill"></i> Overdue</span>
+                                {% else %}
+                                    <span class="badge badge-amber"><i class="bi bi-clock-fill"></i> Pending</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Completed On -->
+                            <td style="color:var(--text-muted);white-space:nowrap;">
+                                {% if task.status == 'completed' %}
+                                    {{ task.completed_at|date:"M d, Y" }}
+                                {% else %}—{% endif %}
+                            </td>
+
+                            <td>
+                                {% if task.evaluation %}
+                                    <span class="badge" style="background:var(--purple-light);color:var(--purple);"><i class="bi bi-clipboard-check-fill"></i> Evaluated</span>
+                                {% elif task.status == 'completed' %}
+                                    <span class="badge badge-amber"><i class="bi bi-hourglass-split"></i> Pending</span>
+                                {% else %}
+                                    <span class="badge" style="background:#f1f5f9;color:var(--text-muted);">Not ready</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Actions -->
+                            <td>
+                                <div class="act-btns">
+                                    <a href="{% url 'edit_task' task.id %}" class="act-btn edit" title="Edit task">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <button type="button" class="act-btn eval" title="View evaluation"
+                                            onclick="openEvaluationModal(
+                                                '{{ task.student.name|escapejs }}',
+                                                '{{ task.title|escapejs }}',
+                                                '{% if task.evaluation %}{{ task.evaluation.enjoyment|default:'' }}{% endif %}',
+                                                '{% if task.evaluation %}{{ task.evaluation.enjoyment_label|escapejs }}{% endif %}',
+                                                '{% if task.evaluation %}{{ task.evaluation.get_difficulty_display|escapejs }}{% endif %}',
+                                                '{% if task.evaluation %}{{ task.evaluation.get_effort_display|escapejs }}{% endif %}',
+                                                '{% if task.evaluation %}{{ task.evaluation.get_feeling_display|escapejs }}{% endif %}',
+                                                '{% if task.evaluation %}{{ task.evaluation.get_participation_display|escapejs }}{% endif %}',
+                                                '{% if task.evaluation %}{{ task.evaluation.submitted_at|date:'M d, Y h:i A'|escapejs }}{% endif %}'
+                                            )">
+                                        <i class="bi bi-clipboard-data-fill"></i>
+                                    </button>
+                                    <button type="button" class="act-btn del" title="Delete task"
+                                            onclick="openDeleteModal('{% url 'delete_task' task.id %}', '{{ task.title|escapejs }}')">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-journal-x"></i>
+                <p>
+                    {% if search_filter %}No tasks match "{{ search_filter }}"
+                    {% elif status_filter %}No {{ status_filter }} tasks found.
+                    {% else %}No tasks have been assigned yet.{% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</main>
+
+<!-- ── Delete Task Modal ── -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:#fef2f2;color:var(--danger);">
+            <i class="bi bi-trash-fill"></i>
+        </div>
+        <div class="modal-title">Delete Task?</div>
+        <div class="modal-msg" id="deleteMsg">This action cannot be undone.</div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <form id="deleteForm" method="POST" style="flex:1;">
+                {% csrf_token %}
+                <button type="submit" class="modal-confirm-danger" style="width:100%;">Yes, Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Evaluation Modal -->
+<div class="modal-overlay" id="evaluationModal">
+    <div class="modal-box eval-modal">
+        <div class="modal-icon" style="background:var(--purple-light);color:var(--purple);">
+            <i class="bi bi-clipboard-data-fill"></i>
+        </div>
+        <div class="modal-title" id="evalTitle">Task Evaluation</div>
+        <div class="eval-meta" id="evalMeta"></div>
+        <div class="eval-summary" id="evalSummary"></div>
+        <div class="modal-actions" style="margin-top:18px;">
+            <button class="modal-cancel" type="button" onclick="closeEvaluationModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Sign Out Modal ── -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem;">🚪</div>
+        <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:5px;">Sign Out?</div>
+        <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">
+            Are you sure you want to sign out of Inclusive Classroom?
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);">
+                Cancel
+            </button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:9px;border-radius:8px;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                Yes, Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openDeleteModal(url, name) {
+        document.getElementById('deleteMsg').textContent =
+            'Are you sure you want to delete "' + name + '"? This cannot be undone.';
+        document.getElementById('deleteForm').action = url;
+        document.getElementById('deleteModal').classList.add('show');
+    }
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('show');
+    }
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, function(char) {
+            return ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char];
+        });
+    }
+    function openEvaluationModal(studentName, taskTitle, enjoyment, enjoymentLabel, difficulty, effort, feeling, participation, submittedAt) {
+        const summary = document.getElementById('evalSummary');
+        const hasEvaluation = [enjoyment, enjoymentLabel, difficulty, effort, feeling, participation, submittedAt]
+            .some(value => String(value || '').trim() !== '');
+
+        document.getElementById('evalTitle').textContent = taskTitle || 'Task Evaluation';
+        document.getElementById('evalMeta').textContent = studentName + (submittedAt ? ' - ' + submittedAt : '');
+
+        if (!hasEvaluation) {
+            summary.innerHTML = '<div class="eval-empty">No evaluation has been submitted for this task yet.</div>';
+        } else {
+            const rows = [
+                ['Enjoyment', enjoyment ? `${'★'.repeat(Number(enjoyment))} ${enjoymentLabel || ''}` : enjoymentLabel],
+                ['Difficulty', difficulty],
+                ['Effort', effort],
+                ['Feeling', feeling],
+                ['Participation', participation || 'Not provided'],
+            ].filter(row => String(row[1] || '').trim() !== '');
+
+            summary.innerHTML = rows.map(([label, value]) => `
+                <div class="eval-row">
+                    <div class="eval-label">${escapeHtml(label)}</div>
+                    <div class="eval-value">${escapeHtml(value)}</div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('evaluationModal').classList.add('show');
+    }
+    function closeEvaluationModal() {
+        document.getElementById('evaluationModal').classList.remove('show');
+    }
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+    document.getElementById('evaluationModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEvaluationModal();
+    });
+    document.getElementById('logoutModal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+</script>
+</body>
+</html>

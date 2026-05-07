@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Inclusive Classroom{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+            --accent:#f59e0b; --success:#10b981; --danger:#ef4444;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:.58rem;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:.58rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#64748b;font-weight:600;font-size:.82rem;text-decoration:none;transition:all .15s;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+        .nav-item.active{background:var(--primary);color:white;}
+        .nav-item i{font-size:.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:.78rem;font-weight:700;color:white;}
+        .user-role{font-size:.63rem;color:#475569;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
+        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;position:sticky;top:0;z-index:50;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .page-content{padding:22px 26px;}
+        .card{border:1px solid var(--border);border-radius:12px;}
+        .card-header:first-child{border-radius:12px 12px 0 0;}
+        .btn-primary,.bg-primary{background-color:var(--primary)!important;border-color:var(--primary)!important;}
+        .text-primary{color:var(--primary)!important;}
+        .list-group-item.active{background-color:var(--primary);border-color:var(--primary);}
+        .form-control,.form-select{border-radius:10px;border:1.5px solid var(--border);}
+        .form-control:focus,.form-select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+        .form-group{margin-bottom:1rem;}
+        .btn-block{display:block;width:100%;}
+        .mr-2{margin-right:.5rem!important}.mr-4{margin-right:1.5rem!important}.mb-md-0{margin-bottom:0!important}.pl-3{padding-left:1rem!important}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.page-content{padding:16px}.topbar{padding:0 16px;}}
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="bi bi-book-fill"></i></div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Learning Management System</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        {% with current=request.resolver_match.url_name %}
+            {% if user.userprofile.role == 'admin' %}
+                <div class="nav-label">Overview</div>
+                <a href="{% url 'admin_dashboard' %}" class="nav-item {% if current == 'admin_dashboard' %}active{% endif %}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+                <div class="nav-label">Users</div>
+                <a href="{% url 'admin_user_list' %}" class="nav-item {% if current == 'admin_user_list' %}active{% endif %}"><i class="bi bi-people-fill"></i> All Users</a>
+                <a href="{% url 'admin_add_user' %}" class="nav-item {% if current == 'admin_add_user' %}active{% endif %}"><i class="bi bi-person-plus-fill"></i> Add User</a>
+            {% elif user.userprofile.role == 'student' %}
+                <div class="nav-label">Main</div>
+                <a href="{% url 'student_dashboard' %}" class="nav-item {% if current == 'student_dashboard' %}active{% endif %}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+                <a href="{% url 'student_tasks' %}" class="nav-item {% if current == 'student_tasks' %}active{% endif %}"><i class="bi bi-card-checklist"></i> My Tasks</a>
+                <a href="{% url 'student_profile' %}" class="nav-item {% if current == 'student_profile' %}active{% endif %}"><i class="bi bi-person-circle"></i> Profile</a>
+            {% else %}
+                <div class="nav-label">Main</div>
+                <a href="{% url 'dashboard' %}" class="nav-item {% if current == 'dashboard' %}active{% endif %}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+                <div class="nav-label">Management</div>
+                <a href="{% url 'student_list' %}" class="nav-item {% if current == 'student_list' or current == 'student_detail' or current == 'edit_student' %}active{% endif %}"><i class="bi bi-people-fill"></i> Students</a>
+                <a href="{% url 'add_student' %}" class="nav-item {% if current == 'add_student' %}active{% endif %}"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+                <a href="{% url 'teacher_feedback' %}" class="nav-item {% if current == 'teacher_feedback' %}active{% endif %}"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
+                <div class="nav-label">Tasks</div>
+                <a href="{% url 'assign_task' %}" class="nav-item {% if current == 'assign_task' %}active{% endif %}"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
+                <a href="{% url 'task_history' %}" class="nav-item {% if current == 'task_history' %}active{% endif %}"><i class="bi bi-journal-text"></i> Task History &amp; Evaluation</a>
+                <div class="nav-label">Monitoring</div>
+                <a href="{% url 'student_monitoring' %}" class="nav-item {% if current == 'student_monitoring' %}active{% endif %}"><i class="bi bi-activity"></i> Activity Monitor</a>
+            {% endif %}
+        {% endwith %}
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">{{ user.username|first|upper }}</div>
+            <div>
+                <div class="user-name">{{ user.username }}</div>
+                <div class="user-role">{{ user.userprofile.role|capfirst }}</div>
+            </div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="topbar-title">{% block page_title %}Inclusive Classroom{% endblock %}</div>
+    </div>
+    <div class="page-content">
+        {% if messages %}
+        <div style="margin-bottom:16px;">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert" style="font-size:.83rem;border-radius:10px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;"><i class="bi bi-box-arrow-left"></i></div>
+        <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Sign Out?</h5>
+        <p style="font-size:.83rem;color:#64748b;margin:0 0 24px;">Are you sure you want to sign out of Inclusive Classroom?</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">Cancel</button>
+            <a href="{% url 'logout' %}" style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">Yes, Sign Out</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

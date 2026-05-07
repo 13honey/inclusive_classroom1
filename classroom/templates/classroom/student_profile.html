@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+            --success:#10b981; --success-light:#ecfdf5;
+            --danger:#ef4444;
+            --warning:#f59e0b; --warning-light:#fffbeb;
+            --purple:#7c3aed; --purple-light:#f5f3ff;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --hearing:#fce7f3; --hearing-text:#be185d;
+            --visual:#d1fae5;  --visual-text:#065f46;
+            --down:#fef3c7;    --down-text:#92400e;
+            --multiple:#ede9fe;--multiple-text:#5b21b6;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        /* SIDEBAR */
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:.58rem;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:.58rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#64748b;font-weight:600;font-size:.82rem;text-decoration:none;transition:all .15s;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+        .nav-item.active{background:var(--primary);color:white;}
+        .nav-item i{font-size:.9rem;width:17px;text-align:center;}
+        .nav-subitem{margin-left:18px;padding:8px 11px;font-size:.76rem;}
+        .nav-subitem i{font-size:.82rem;width:15px;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0;}
+        .user-avatar-fallback{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:.78rem;font-weight:700;color:white;}
+        .user-role{font-size:.63rem;color:#475569;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
+
+        /* LAYOUT */
+        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;position:sticky;top:0;z-index:50;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .page-content{
+            padding:28px;
+            background:
+                linear-gradient(135deg,rgba(37,99,235,.09),rgba(124,58,237,.08) 45%,rgba(16,185,129,.08)),
+                radial-gradient(circle at top left,rgba(245,158,11,.14),transparent 32%),
+                var(--bg);
+            min-height:calc(100vh - 58px);
+        }
+
+        /* PROFILE LAYOUT */
+        .profile-wrap{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;width:100%;margin:0;}
+        .profile-section{display:none;}
+        .profile-section.active-section{display:block;}
+
+        /* LEFT CARD */
+        .left-card{background:white;border-radius:14px;border:1px solid rgba(226,232,240,.9);overflow:hidden;box-shadow:0 18px 45px rgba(15,23,42,.09);}
+        .left-card-head{padding:16px 22px;border-bottom:1px solid var(--border);font-size:.92rem;font-weight:800;display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#ffffff,#f8fbff);}
+        .left-card-head i{color:var(--primary);}
+        .pic-section{
+            padding:38px 24px 30px;
+            text-align:center;
+            border-bottom:1px solid var(--border);
+            background:
+                radial-gradient(circle at 18% 18%,rgba(245,158,11,.22),transparent 24%),
+                radial-gradient(circle at 82% 12%,rgba(16,185,129,.18),transparent 26%),
+                linear-gradient(135deg,#eff6ff 0%,#f5f3ff 48%,#ecfdf5 100%);
+        }
+        .big-avatar{width:138px;height:138px;border-radius:50%;object-fit:cover;border:6px solid rgba(255,255,255,.92);margin:0 auto 16px;display:block;box-shadow:0 18px 38px rgba(37,99,235,.22);}
+        .big-avatar-fallback{width:138px;height:138px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:800;margin:0 auto 16px;border:6px solid rgba(255,255,255,.92);box-shadow:0 18px 38px rgba(37,99,235,.22);}
+        .s-full-name{font-size:1.2rem;font-weight:800;margin-bottom:6px;}
+        .grade-tag{display:inline-flex;align-items:center;gap:5px;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:700;}
+        .badge-pill{display:inline-flex;align-items:center;border-radius:20px;padding:2px 9px;font-size:.67rem;font-weight:700;margin:2px;}
+        .badge-hearing{background:var(--hearing);color:var(--hearing-text);} .badge-visual{background:var(--visual);color:var(--visual-text);}
+        .badge-down{background:var(--down);color:var(--down-text);} .badge-multiple{background:var(--multiple);color:var(--multiple-text);}
+        .p-rows{padding:18px 22px 24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 28px;}
+        .p-row{display:flex;align-items:flex-start;padding:14px 0;border-bottom:1px solid #f1f5f9;}
+        .p-row:last-child{border-bottom:none;}
+        .p-icon{width:30px;flex-shrink:0;color:var(--primary);font-size:.9rem;padding-top:2px;}
+        .p-label{font-size:.62rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+        .p-value{font-size:.86rem;font-weight:700;color:var(--text);margin-top:2px;line-height:1.45;}
+
+        /* RIGHT SIDE */
+        .right-col{display:flex;flex-direction:column;gap:16px;}
+        .info-card{background:white;border-radius:14px;border:1px solid rgba(226,232,240,.9);overflow:hidden;box-shadow:0 18px 45px rgba(15,23,42,.09);}
+        .info-head{padding:16px 22px;border-bottom:1px solid var(--border);font-size:.92rem;font-weight:800;display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#ffffff,#f8fbff);}
+        .info-head i{color:var(--primary);}
+        .info-body{padding:22px;}
+        .info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+        .info-item{padding:14px;background:linear-gradient(135deg,#f8fafc,#ffffff);border:1px solid #eef2f7;border-radius:10px;}
+        .info-item .i-label{font-size:.63rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+        .info-item .i-value{font-size:.88rem;font-weight:700;color:var(--text);}
+
+        .assess-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:4px 11px;font-size:.72rem;font-weight:700;}
+        .ab-progress{background:var(--purple-light);color:var(--purple);}
+        .ab-graded{background:var(--primary-light);color:var(--primary);}
+
+        .support-pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:.7rem;font-weight:700;}
+        .sp-beginner{background:#fef3c7;color:#92400e;}
+        .sp-developing{background:#dbeafe;color:#1d4ed8;}
+        .sp-independent{background:#d1fae5;color:#065f46;}
+
+        .skills-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+        .prog-skill{margin-bottom:0;padding:12px 14px;background:linear-gradient(135deg,#f8fafc,#ffffff);border:1px solid #eef2f7;border-radius:10px;}
+        .prog-skill:last-child{margin-bottom:0;}
+        .prog-skill.highlight{background:var(--primary-light);border-color:#dbeafe;}
+        .prog-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px;}
+        .prog-name{font-size:.83rem;font-weight:800;color:var(--text);}
+        .prog-pct{font-size:.76rem;font-weight:800;color:var(--text-muted);}
+        .prog-bar-wrap{background:#eaf0f7;border-radius:20px;height:8px;overflow:hidden;}
+        .prog-bar{height:100%;border-radius:20px;transition:width .6s ease;}
+        .pb-blue{background:linear-gradient(90deg,var(--primary),#7c3aed);}
+        .pb-green{background:linear-gradient(90deg,var(--success),#059669);}
+        .pb-amber{background:linear-gradient(90deg,var(--warning),#d97706);}
+        .pb-pink{background:linear-gradient(90deg,#ec4899,#be185d);}
+        .pb-teal{background:linear-gradient(90deg,#14b8a6,#0d9488);}
+
+        .status-pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:.7rem;font-weight:700;}
+        .sp-notstarted{background:#f1f5f9;color:var(--text-muted);}
+        .sp-inprogress{background:#dbeafe;color:#1d4ed8;}
+        .sp-achieved{background:#d1fae5;color:#065f46;}
+
+        .skill-tag{display:inline-flex;align-items:center;background:#f1f5f9;color:var(--text);border-radius:20px;padding:3px 9px;font-size:.7rem;font-weight:700;margin:2px;}
+
+        .feedback-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+        .feedback-item{padding:14px 16px;background:linear-gradient(135deg,#f8fafc,#ffffff);border-radius:10px;border:1px solid #eef2f7;border-left:4px solid var(--primary);margin-bottom:0;}
+        .feedback-item:last-child{margin-bottom:0;}
+        .feedback-meta{font-size:.68rem;color:var(--text-muted);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+        .feedback-text{font-size:.86rem;font-weight:600;color:var(--text);line-height:1.6;}
+        .feedback-empty{text-align:center;padding:44px 24px;color:var(--text-muted);font-size:.82rem;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .left-card{animation:fadeUp .3s ease .05s both;}
+        .info-card:nth-child(1){animation:fadeUp .3s ease .1s both;}
+        .info-card:nth-child(2){animation:fadeUp .3s ease .15s both;}
+        .info-card:nth-child(3){animation:fadeUp .3s ease .2s both;}
+
+        @media(max-width:1100px){.p-rows,.info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:900px){.skills-grid,.feedback-list{grid-template-columns:1fr}}
+        @media(max-width:900px){.info-grid{grid-template-columns:1fr}}
+        @media(max-width:640px){.page-content{padding:18px}.p-rows{grid-template-columns:1fr}.left-card-head,.info-head{padding:15px 18px}.info-body{padding:18px}}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.info-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Learning Management System</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="{% url 'student_dashboard' %}" class="nav-item"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">My Learning</div>
+        <a href="#personal-info" class="nav-item active profile-tab" data-target="personal-info"><i class="bi bi-person-circle"></i> My Profile</a>
+        <a href="#progress-overview" class="nav-item nav-subitem profile-tab" data-target="progress-overview"><i class="bi bi-mortarboard-fill"></i> Progress Overview</a>
+        {% if student.grading_type == 'ungraded' %}
+        <a href="#skills-progress" class="nav-item nav-subitem profile-tab" data-target="skills-progress"><i class="bi bi-bar-chart-fill"></i> Skills Progress</a>
+        {% endif %}
+        <a href="#teacher-feedback" class="nav-item nav-subitem profile-tab" data-target="teacher-feedback"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
+        <a href="{% url 'student_tasks' %}" class="nav-item"><i class="bi bi-list-task"></i> Task Wall</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            {% if student and student.profile_picture %}<img src="{{ student.profile_picture.url }}" class="user-avatar">
+            {% else %}<div class="user-avatar-fallback">{{ student.name|first|upper }}</div>{% endif %}
+            <div><div class="user-name">{{ student.name }}</div><div class="user-role">Student</div></div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar"><div class="topbar-title">My Profile</div></div>
+    <div class="page-content">
+
+        {% if student %}
+        <div class="profile-wrap">
+
+            <!-- LEFT: Personal Info -->
+            <div class="left-card profile-section active-section" id="personal-info">
+                <div class="left-card-head"><i class="bi bi-person-circle"></i> Personal Information</div>
+                <div class="pic-section">
+                    {% if student.profile_picture %}<img src="{{ student.profile_picture.url }}" class="big-avatar">
+                    {% else %}<div class="big-avatar-fallback">{{ student.name|first }}</div>{% endif %}
+                    <div class="s-full-name">{{ student.name }}</div>
+                    <div style="margin-top:6px;"><span class="grade-tag"><i class="bi bi-mortarboard-fill"></i> {{ student.grade_level }}</span></div>
+                </div>
+                <div class="p-rows">
+                    <div class="p-row"><div class="p-icon"><i class="bi bi-hash"></i></div><div><div class="p-label">LRN</div><div class="p-value">{{ student.lrn|default:"Not provided" }}</div></div></div>
+                    <div class="p-row"><div class="p-icon"><i class="bi bi-calendar3"></i></div><div><div class="p-label">Age</div><div class="p-value">{{ student.age }} years old</div></div></div>
+                    <div class="p-row"><div class="p-icon"><i class="bi bi-envelope-fill"></i></div><div><div class="p-label">Email</div><div class="p-value">{{ student.email|default:"Not provided" }}</div></div></div>
+                    <div class="p-row"><div class="p-icon"><i class="bi bi-telephone-fill"></i></div><div><div class="p-label">Phone</div><div class="p-value">{{ student.phone_number|default:"Not provided" }}</div></div></div>
+                    <div class="p-row"><div class="p-icon"><i class="bi bi-geo-alt-fill"></i></div><div><div class="p-label">Address</div><div class="p-value">{{ student.address|default:"Not provided" }}</div></div></div>
+                    <div class="p-row"><div class="p-icon"><i class="bi bi-calendar-check-fill"></i></div><div><div class="p-label">Date Enrolled</div><div class="p-value">{{ student.enrolled_date }}</div></div></div>
+                </div>
+            </div>
+
+            <!-- Profile Sections -->
+            <div class="right-col">
+
+                <!-- 1. Student Progress Overview -->
+                <div class="info-card profile-section" id="progress-overview">
+                    <div class="info-head"><i class="bi bi-mortarboard-fill"></i> Student Progress Overview</div>
+                    <div class="info-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="i-label">Learning Level</div>
+                                <div class="i-value">
+                                    {% if student.learning_level == 'beginner' %}<span class="support-pill sp-beginner">🌱 Beginner</span>
+                                    {% elif student.learning_level == 'developing' %}<span class="support-pill sp-developing">📈 Developing</span>
+                                    {% elif student.learning_level == 'independent' %}<span class="support-pill sp-independent">⭐ Independent</span>
+                                    {% else %}<span style="color:var(--text-muted);font-size:.82rem;">Not set</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="i-label">Assessment Type</div>
+                                <div class="i-value">
+                                    {% if student.grading_type == 'ungraded' %}<span class="assess-badge ab-progress">🌟 Progress-Based</span>
+                                    {% else %}<span class="assess-badge ab-graded">📊 Graded</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="i-label">Progress Status</div>
+                                <div class="i-value">
+                                    {% if student.progress_status == 'not_started' %}<span class="status-pill sp-notstarted">⬜ Not Started</span>
+                                    {% elif student.progress_status == 'in_progress' %}<span class="status-pill sp-inprogress">🔵 In Progress</span>
+                                    {% elif student.progress_status == 'achieved' %}<span class="status-pill sp-achieved">✅ Achieved</span>
+                                    {% else %}<span style="color:var(--text-muted);font-size:.82rem;">Not set</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item" style="grid-column:1/-1;">
+                                <div class="i-label">Skills Focus</div>
+                                <div class="i-value" style="margin-top:5px;">
+                                    {% if student.skills_focus %}
+                                        <!-- FIX: Use the context variable 'skills_list' passed from view -->
+                                        {% for skill in skills_list %}
+                                            <span class="skill-tag">{{ skill }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span style="color:var(--text-muted);font-size:.82rem;">No skills set</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item" style="grid-column:1/-1;">
+                                <div class="i-label">Learning Goals</div>
+                                <div class="i-value" style="font-size:.82rem;line-height:1.6;">{{ student.learning_goals|default:"No learning goals set yet." }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Skills Progress Tracking (ungraded only) -->
+                {% if student.grading_type == 'ungraded' %}
+                <div class="info-card profile-section" id="skills-progress">
+                    <div class="info-head"><i class="bi bi-bar-chart-fill"></i> Skills Progress Tracking</div>
+                    <div class="info-body">
+                        <div class="skills-grid">
+                            <div class="prog-skill">
+                                <div class="prog-row"><div class="prog-name">Communication Skills</div><div class="prog-pct">{{ student.progress_communication }}%</div></div>
+                                <div class="prog-bar-wrap"><div class="prog-bar pb-blue" style="width:{{ student.progress_communication }}%;"></div></div>
+                            </div>
+                            <div class="prog-skill">
+                                <div class="prog-row"><div class="prog-name">Motor Skills</div><div class="prog-pct">{{ student.progress_motor }}%</div></div>
+                                <div class="prog-bar-wrap"><div class="prog-bar pb-green" style="width:{{ student.progress_motor }}%;"></div></div>
+                            </div>
+                            <div class="prog-skill">
+                                <div class="prog-row"><div class="prog-name">Social Skills</div><div class="prog-pct">{{ student.progress_social }}%</div></div>
+                                <div class="prog-bar-wrap"><div class="prog-bar pb-amber" style="width:{{ student.progress_social }}%;"></div></div>
+                            </div>
+                            <div class="prog-skill">
+                                <div class="prog-row"><div class="prog-name">Self-Care Skills</div><div class="prog-pct">{{ student.progress_selfcare }}%</div></div>
+                                <div class="prog-bar-wrap"><div class="prog-bar pb-pink" style="width:{{ student.progress_selfcare }}%;"></div></div>
+                            </div>
+                            <div class="prog-skill">
+                                <div class="prog-row"><div class="prog-name">Academic Readiness</div><div class="prog-pct">{{ student.progress_academic }}%</div></div>
+                                <div class="prog-bar-wrap"><div class="prog-bar pb-teal" style="width:{{ student.progress_academic }}%;"></div></div>
+                            </div>
+                            <div class="prog-skill highlight">
+                                <div class="prog-row"><div class="prog-name">Task Completion</div><div class="prog-pct">{{ done_tasks }}/{{ total_tasks }}</div></div>
+                                <div class="prog-bar-wrap"><div class="prog-bar pb-blue" style="width:{% if total_tasks > 0 %}{% widthratio done_tasks total_tasks 100 %}%{% else %}0%{% endif %};"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 3. Teacher Feedback -->
+                <div class="info-card profile-section" id="teacher-feedback">
+                    <div class="info-head"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</div>
+                    <div class="info-body">
+                        {% if feedbacks %}
+                            <div class="feedback-list">
+                            {% for fb in feedbacks %}
+                            <div class="feedback-item">
+                                <div class="feedback-meta">
+                                    <i class="bi bi-person-fill"></i> {{ fb.teacher_name }}
+                                    <span>·</span>
+                                    <i class="bi bi-calendar3"></i> {{ fb.date|date:"M d, Y" }}
+                                </div>
+                                <div class="feedback-text">{{ fb.observation }}</div>
+                                {% if fb.recommendation %}
+                                <div style="margin-top:7px;padding:7px 10px;background:var(--primary-light);border-radius:7px;font-size:.75rem;font-weight:600;color:var(--primary);">
+                                    <i class="bi bi-lightbulb-fill me-1"></i> {{ fb.recommendation }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="feedback-empty">
+                                <i class="bi bi-chat-dots" style="font-size:1.8rem;opacity:.2;display:block;margin-bottom:8px;"></i>
+                                <div style="font-weight:700;margin-bottom:3px;">No feedback yet</div>
+                                <div style="font-size:.75rem;">Your teacher will add feedback here.</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div><!-- /right-col -->
+        </div>
+
+        {% else %}
+        <div style="padding:20px;background:#fffbeb;border-radius:12px;border:1px solid #fde68a;color:#92400e;font-weight:600;">
+            <i class="bi bi-exclamation-triangle-fill" style="margin-right:7px;"></i>No student record found. Please contact your teacher.
+        </div>
+        {% endif %}
+
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const HEARTBEAT_URL = "{% url 'student_heartbeat' %}?student={{ student.id }}";
+
+function showProfileSection(sectionId, updateHash = true) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    document.querySelectorAll('.profile-section').forEach(panel => {
+        panel.classList.toggle('active-section', panel.id === sectionId);
+    });
+
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.target === sectionId);
+    });
+
+    if (updateHash) {
+        history.replaceState(null, '', '#' + sectionId);
+    }
+}
+
+document.querySelectorAll('.profile-tab').forEach(tab => {
+    tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        showProfileSection(this.dataset.target);
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionId = window.location.hash ? window.location.hash.slice(1) : 'personal-info';
+    showProfileSection(sectionId, false);
+});
+
+function sendHeartbeat() {
+    fetch(HEARTBEAT_URL, {credentials: 'same-origin'})
+        .then(r => r.json())
+        .then(data => {
+            if (!data.ok && window.studentHeartbeatTimer) {
+                clearInterval(window.studentHeartbeatTimer);
+            }
+        })
+        .catch(() => {});
+}
+
+sendHeartbeat();
+window.studentHeartbeatTimer = setInterval(sendHeartbeat, 30000);
+</script>
+<!-- Sign Out Confirmation Modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;">🚪</div>
+        <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Sign Out?</h5>
+        <p style="font-size:.83rem;color:#64748b;margin:0 0 24px;">Are you sure you want to sign out of Inclusive Classroom?</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">
+                Cancel
+            </button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                Yes, Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User - Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root{
+            --primary:#1e1b4b; --accent:#6366f1; --accent-light:#eef2ff;
+            --warning:#f59e0b; --danger:#ef4444;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:var(--primary);display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:0.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:0.58rem;color:#4338ca;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .role-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:20px;padding:3px 9px;font-size:0.63rem;font-weight:700;margin-top:8px;text-transform:uppercase;letter-spacing:0.8px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:0.58rem;font-weight:700;color:#4338ca;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#a5b4fc;font-weight:600;font-size:0.82rem;text-decoration:none;transition:all 0.15s;}
+        .nav-item:hover{background:rgba(255,255,255,0.07);color:white;}
+        .nav-item.active{background:var(--accent);color:white;}
+        .nav-item i{font-size:0.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,0.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:0.78rem;font-weight:700;color:white;}
+        .user-role{font-size:0.63rem;color:#6366f1;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#6366f1;font-size:0.77rem;font-weight:600;text-decoration:none;transition:all 0.15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,0.07);}
+        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .btn-back{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:white;border:1.5px solid var(--border);border-radius:8px;font-size:0.8rem;font-weight:700;color:var(--text-muted);text-decoration:none;transition:all 0.15s;}
+        .btn-back:hover{border-color:var(--accent);color:var(--accent);}
+        .page-content{padding:24px 28px;}
+
+        /* FORM CARD */
+        .form-wrap{width:100%;max-width:1040px;margin:0 auto;}
+        .form-card{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+        .form-card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+        .form-card-icon{width:38px;height:38px;border-radius:10px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+        .form-card-title{font-size:0.95rem;font-weight:800;}
+        .form-card-sub{font-size:0.73rem;color:var(--text-muted);margin-top:1px;}
+        .form-card-body{padding:22px 24px;}
+
+        .f-label{font-size:0.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px;}
+        .f-req{color:var(--danger);}
+        .f-group{margin-bottom:16px;}
+        .f-hint{font-size:0.68rem;color:var(--text-muted);margin-top:4px;}
+
+        input[type=text],input[type=email],input[type=password],input[type=number],select{width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--border);font-family:inherit;font-size:0.85rem;font-weight:500;outline:none;background:white;color:var(--text);transition:border-color 0.15s;-webkit-appearance:none;}
+        input:focus,select:focus{border-color:var(--accent);}
+        select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:32px;}
+        .pw-wrap{position:relative;}
+        .pw-wrap input{padding-right:40px;}
+        .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:0.9rem;padding:0;display:flex;align-items:center;transition:color 0.15s;}
+        .pw-toggle:hover{color:var(--accent);}
+
+        /* ROLE OPTION CARDS */
+        .role-options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;}
+        .role-opt{position:relative;}
+        .role-opt input[type=radio]{position:absolute;opacity:0;width:0;height:0;}
+        .role-opt label{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;transition:all 0.15s;text-align:center;}
+        .role-opt label:hover{border-color:var(--accent);}
+        .role-opt input:checked+label{border-color:var(--accent);background:var(--accent-light);}
+        .role-opt-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:2px;}
+        .ri-admin{background:#fce7f3;color:#be185d;}
+        .ri-teacher{background:#ecfdf5;color:#065f46;}
+        .ri-student{background:var(--accent-light);color:var(--accent);}
+        .role-opt-name{font-size:0.78rem;font-weight:700;color:var(--text);}
+
+        .alert-bar{padding:10px 13px;border-radius:8px;margin-bottom:16px;font-size:0.83rem;font-weight:600;display:flex;align-items:center;gap:7px;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+        .section-sep{font-size:0.66rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;margin:18px 0 14px;}
+        .section-sep::before,.section-sep::after{content:'';flex:1;height:1px;background:var(--border);}
+        .account-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+        .account-grid .f-group{margin-bottom:0;}
+        .account-grid .wide{grid-column:1/-1;}
+        .btn-row{display:flex;gap:10px;margin-top:6px;}
+        .btn-submit{flex:1;padding:10px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:inherit;font-weight:800;font-size:0.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background 0.15s;}
+        .btn-submit:hover{background:#4f46e5;}
+        .btn-cancel{padding:10px 18px;background:white;color:var(--text-muted);border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-weight:700;font-size:0.875rem;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;}
+        .btn-cancel:hover{border-color:#94a3b8;color:var(--text);}
+        @media(max-width:760px){.account-grid{grid-template-columns:1fr}.account-grid .wide{grid-column:auto}}
+        @media(max-width:640px){.sidebar{display:none}.main{margin-left:0}.page-content{padding:16px}.form-wrap{max-width:none}.role-options{grid-template-columns:1fr 1fr}}
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🏫</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Management System</div>
+            <div class="role-chip"><i class="bi bi-shield-fill"></i> Administrator</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Overview</div>
+        <a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">Users</div>
+        <a href="{% url 'admin_user_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> All Users</a>
+        <a href="{% url 'admin_add_user' %}" class="nav-item active"><i class="bi bi-person-plus-fill"></i> Add User</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">{{ user.username|first|upper }}</div>
+            <div><div class="user-name">{{ user.username }}</div><div class="user-role">System Admin</div></div>
+        </div>
+        <a href="{% url 'logout' %}" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="topbar-title">Add New User</div>
+        <a href="{% url 'admin_user_list' %}" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Users</a>
+    </div>
+    <div class="page-content">
+        <div class="form-wrap">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon"><i class="bi bi-person-plus-fill"></i></div>
+                    <div>
+                        <div class="form-card-title">Create New Account</div>
+                        <div class="form-card-sub">Fill in the details to add a new user to the system</div>
+                    </div>
+                </div>
+                <div class="form-card-body">
+
+                    {% if messages %}{% for message in messages %}
+                    <div class="alert-bar"><i class="bi bi-exclamation-circle-fill"></i>{{ message }}</div>
+                    {% endfor %}{% endif %}
+
+                    <form method="POST">{% csrf_token %}
+
+                        <div class="section-sep">Account Details</div>
+
+                        <div class="account-grid">
+                            <div class="f-group">
+                                <label class="f-label">Username <span class="f-req">*</span></label>
+                                <input type="text" name="username" required placeholder="e.g. teacher.santos" value="{{ form_data.username|default:'' }}">
+                                <div class="f-hint">This will be used to log in to the system.</div>
+                            </div>
+
+                            <div class="f-group">
+                                <label class="f-label">Email Address</label>
+                                <input type="email" name="email" placeholder="e.g. teacher@school.edu.ph" value="{{ form_data.email|default:'' }}">
+                            </div>
+
+                            <div class="f-group wide">
+                                <label class="f-label">Password <span class="f-req">*</span></label>
+                                <div class="pw-wrap">
+                                    <input type="password" name="password" id="pw-new" required placeholder="Set a strong password">
+                                    <button type="button" class="pw-toggle" onclick="togglePw('pw-new',this)"><i class="bi bi-eye"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-sep">Assign Role</div>
+
+                        <div class="f-group">
+                            <div class="role-options">
+                                <div class="role-opt">
+                                    <input type="radio" name="role" id="role-admin" value="admin" {% if form_data.role == 'admin' %}checked{% endif %} onchange="toggleStudentFields()">
+                                    <label for="role-admin">
+                                        <div class="role-opt-icon ri-admin"><i class="bi bi-shield-fill"></i></div>
+                                        <div class="role-opt-name">Admin</div>
+                                    </label>
+                                </div>
+                                <div class="role-opt">
+                                    <input type="radio" name="role" id="role-teacher" value="teacher" {% if form_data.role == 'teacher' or not form_data.role %}checked{% endif %} onchange="toggleStudentFields()">
+                                    <label for="role-teacher">
+                                        <div class="role-opt-icon ri-teacher"><i class="bi bi-person-workspace"></i></div>
+                                        <div class="role-opt-name">Teacher</div>
+                                    </label>
+                                </div>
+                                <div class="role-opt">
+                                    <input type="radio" name="role" id="role-student" value="student" {% if form_data.role == 'student' %}checked{% endif %} onchange="toggleStudentFields()">
+                                    <label for="role-student">
+                                        <div class="role-opt-icon ri-student"><i class="bi bi-mortarboard-fill"></i></div>
+                                        <div class="role-opt-name">Student</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="student-fields" style="display:none;">
+                            <div class="section-sep">Student Details</div>
+
+                            <div class="f-group">
+                                <label class="f-label">Full Name <span class="f-req">*</span></label>
+                                <input type="text" name="student_name" id="student-name" placeholder="e.g. Honey Faith L. Cuase" value="{{ form_data.student_name|default:'' }}">
+                                <div class="f-hint">This is the name teachers will see in their dashboard.</div>
+                            </div>
+
+                            <div class="f-group">
+                                <label class="f-label">Age <span class="f-req">*</span></label>
+                                <input type="number" name="student_age" id="student-age" min="3" max="25" placeholder="Age" value="{{ form_data.student_age|default:'' }}">
+                            </div>
+
+                            <div class="f-group">
+                                <label class="f-label">Assigned Teacher <span class="f-req">*</span></label>
+                                <select name="assigned_teacher" id="assigned-teacher">
+                                    {% for teacher in teachers %}
+                                        <option value="{{ teacher.id }}" {% if form_data.assigned_teacher == teacher.id|stringformat:"s" %}selected{% endif %}>{{ teacher.username }}</option>
+                                    {% empty %}
+                                        <option value="">No teachers available</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="f-hint">Teachers only see students assigned to them.</div>
+                            </div>
+                        </div>
+
+                        <div class="btn-row">
+                            <button type="submit" class="btn-submit"><i class="bi bi-person-plus-fill"></i> Create User</button>
+                            <a href="{% url 'admin_user_list' %}" class="btn-cancel"><i class="bi bi-x-lg"></i> Cancel</a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function togglePw(id,btn){
+    const f=document.getElementById(id);const i=btn.querySelector('i');
+    if(f.type==='password'){f.type='text';i.className='bi bi-eye-slash';}
+    else{f.type='password';i.className='bi bi-eye';}
+}
+function toggleStudentFields(){
+    const selectedRole = document.querySelector('input[name="role"]:checked')?.value;
+    const fields = document.getElementById('student-fields');
+    const name = document.getElementById('student-name');
+    const age = document.getElementById('student-age');
+    const teacher = document.getElementById('assigned-teacher');
+    const isStudent = selectedRole === 'student';
+    fields.style.display = isStudent ? 'block' : 'none';
+    name.required = isStudent;
+    age.required = isStudent;
+    teacher.required = isStudent;
+}
+document.addEventListener('DOMContentLoaded', toggleStudentFields);
+</script>
+</body>
+</html>

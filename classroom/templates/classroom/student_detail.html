@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.name }} | Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+            --success:#10b981; --danger:#ef4444; --warning:#f59e0b;
+            --purple:#7c3aed; --purple-light:#f5f3ff;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        /* ── Sidebar ── */
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:.58rem;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:.58rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#64748b;font-weight:600;font-size:.82rem;text-decoration:none;transition:all .15s;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+        .nav-item.active{background:var(--primary);color:white;}
+        .nav-item i{font-size:.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:.78rem;font-weight:700;color:white;}
+        .user-role{font-size:.63rem;color:#475569;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
+
+        /* ── Main layout ── */
+        .main{margin-left:var(--sidebar-w);min-height:100vh;padding-bottom:60px;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
+        .topbar-back{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:.82rem;font-weight:700;text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:white;transition:all .15s;}
+        .topbar-back:hover{background:var(--primary-light);color:var(--primary);border-color:#bfdbfe;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .topbar-chip{display:flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;margin-left:auto;}
+        .page-content{padding:20px 26px;}
+
+        /* ── Profile hero ── */
+        .profile-hero{background:white;border-radius:14px;border:1px solid var(--border);padding:22px 24px;display:flex;align-items:center;gap:18px;margin-bottom:16px;animation:fadeUp .25s ease both;box-shadow:0 8px 24px rgba(15,23,42,.045);}
+        .hero-avatar{width:76px;height:76px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.65rem;overflow:hidden;border:4px solid #dbeafe;}
+        .hero-avatar img{width:100%;height:100%;object-fit:cover;}
+        .hero-name{font-family:'Fraunces',serif;font-size:1.45rem;font-weight:800;color:var(--text);line-height:1.2;}
+        .hero-sub{font-size:.78rem;color:var(--text-muted);font-weight:600;margin-top:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .hero-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+        .btn-edit{padding:8px 16px;border-radius:9px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--text-muted);text-decoration:none;transition:all .15s;}
+        .btn-edit:hover{border-color:#fde68a;background:#fffbeb;color:#d97706;}
+        .btn-delete-student{padding:8px 16px;border-radius:9px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--text-muted);text-decoration:none;transition:all .15s;}
+        .btn-delete-student:hover{border-color:#fecaca;background:#fef2f2;color:var(--danger);}
+
+        /* ── Grid ── */
+        .detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;}
+
+        /* ── Section Cards ── */
+        .section-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px;animation:fadeUp .25s ease both;box-shadow:0 8px 24px rgba(15,23,42,.04);}
+        .section-head{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);}
+        .section-head-left{display:flex;align-items:center;gap:10px;}
+        .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+        .si-blue{background:var(--primary-light);color:var(--primary);}
+        .si-teal{background:#ecfdf5;color:var(--success);}
+        .si-amber{background:#fffbeb;color:var(--warning);}
+        .si-purple{background:var(--purple-light);color:var(--purple);}
+        .si-red{background:#fef2f2;color:var(--danger);}
+        .section-title{font-size:.92rem;font-weight:800;}
+        .section-sub{font-size:.67rem;color:var(--text-muted);margin-top:1px;}
+        .section-count{font-size:.72rem;color:var(--text-muted);font-weight:700;}
+        .section-body{padding:0;}
+
+        /* ── Info rows ── */
+        .info-row{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid #f8fafc;}
+        .info-row:last-child{border-bottom:none;}
+        .info-label{font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;min-width:110px;padding-top:2px;flex-shrink:0;}
+        .info-value{font-size:.84rem;font-weight:600;color:var(--text);flex:1;}
+
+        /* ── Badges ── */
+        .badge{padding:2px 9px;border-radius:20px;font-size:.65rem;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+        .badge-blue{background:var(--primary-light);color:var(--primary);}
+        .badge-purple{background:var(--purple-light);color:var(--purple);}
+        .badge-green{background:#ecfdf5;color:#065f46;}
+        .badge-amber{background:#fffbeb;color:#92400e;}
+        .badge-red{background:#fef2f2;color:#991b1b;}
+        .badge-teal{background:#ecfdf5;color:#0f766e;}
+        .badge-pink{background:#fdf2f8;color:#9d174d;}
+
+        /* ── Add task form ── */
+        .form-body{padding:16px 18px;}
+        .f-group{display:flex;flex-direction:column;margin-bottom:12px;}
+        .f-group:last-child{margin-bottom:0;}
+        .f-label{font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;gap:4px;}
+        .f-req{color:var(--danger);}
+        .f-group input,.f-group textarea,.f-group select{width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:.84rem;font-weight:500;outline:none;color:var(--text);transition:border-color .15s,box-shadow .15s;}
+        .f-group input:focus,.f-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+        .f-group input[type=file]{padding:6px 10px;background:var(--bg);cursor:pointer;}
+        .f-group textarea{resize:vertical;min-height:70px;}
+        .btn-submit{width:100%;padding:9px;border-radius:9px;border:none;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:.84rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;margin-top:4px;}
+        .btn-submit:hover{background:var(--primary-dark);}
+
+        /* ── Task cards ── */
+        .task-list{padding:10px 12px;}
+        .task-item{border-radius:10px;border:1.5px solid var(--border);padding:13px 14px;margin-bottom:9px;transition:all .15s;background:white;}
+        .task-item:last-child{margin-bottom:0;}
+        .task-item:hover{border-color:#bfdbfe;box-shadow:0 2px 10px rgba(37,99,235,.07);}
+        .task-item.completed{border-color:#a7f3d0;background:#f0fdf4;}
+        .task-item.overdue{border-color:#fecaca;background:#fff5f5;}
+        .task-title{font-size:.86rem;font-weight:800;color:var(--text);margin-bottom:3px;}
+        .task-desc{font-size:.77rem;color:var(--text-muted);margin-bottom:6px;line-height:1.5;}
+        .task-meta{font-size:.72rem;color:var(--text-muted);font-weight:600;display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+        .task-meta a{color:var(--primary);text-decoration:none;font-weight:700;}
+        .task-meta a:hover{text-decoration:underline;}
+        .task-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+        .task-actions{display:flex;gap:6px;}
+        .task-btn{padding:5px 12px;border-radius:7px;font-family:inherit;font-weight:700;font-size:.74rem;cursor:pointer;display:flex;align-items:center;gap:4px;text-decoration:none;border:1.5px solid var(--border);background:white;color:var(--text-muted);transition:all .15s;}
+        .task-btn.edit:hover{border-color:#fde68a;background:#fffbeb;color:#d97706;}
+        .task-btn.del:hover{border-color:#fecaca;background:#fef2f2;color:var(--danger);}
+
+        /* ── Task history table ── */
+        .history-table{width:100%;border-collapse:collapse;}
+        .history-table thead th{padding:9px 14px;background:#f8fafc;font-size:.65rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+        .history-table tbody tr{border-bottom:1px solid #f1f5f9;transition:background .12s;}
+        .history-table tbody tr:hover{background:#f8fafc;}
+        .history-table tbody tr:last-child{border-bottom:none;}
+        .history-table tbody td{padding:10px 14px;font-size:.8rem;vertical-align:middle;}
+
+        /* ── Empty states ── */
+        .empty-state{padding:32px 20px;text-align:center;color:var(--text-muted);}
+        .empty-state i{font-size:2rem;opacity:.2;display:block;margin-bottom:8px;}
+        .empty-state p{font-size:.82rem;font-weight:600;margin:0;}
+
+        /* ── Alerts ── */
+        .alert-success-custom{display:flex;align-items:center;gap:8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:9px;padding:11px 14px;font-size:.83rem;font-weight:700;color:#065f46;margin-bottom:14px;}
+        .profile-note{padding:16px 18px;color:var(--text-muted);font-size:.84rem;line-height:1.65;}
+        .profile-note strong{color:var(--text);}
+
+        /* ── Modals ── */
+        .modal-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+        .modal-overlay.show{display:flex;}
+        .modal-box{background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:modalIn .2s ease;}
+        .file-modal-box{background:white;border-radius:14px;width:min(980px,92vw);height:min(720px,86vh);box-shadow:0 20px 60px rgba(0,0,0,.24);animation:modalIn .2s ease;display:flex;flex-direction:column;overflow:hidden;}
+        .file-modal-head{height:54px;padding:0 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+        .file-modal-title{font-size:.9rem;font-weight:800;color:var(--text);}
+        .file-modal-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+        .file-modal-close{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+        .file-modal-close:hover{background:#fef2f2;border-color:#fecaca;color:var(--danger);}
+        .file-modal-body{flex:1;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:0;}
+        .file-modal-frame{display:none;width:100%;height:100%;border:0;background:#f8fafc;flex:1;}
+        .file-modal-image{display:none;max-width:100%;max-height:100%;object-fit:contain;}
+        .file-modal-fallback{display:none;text-align:center;color:var(--text-muted);font-size:.84rem;font-weight:700;padding:24px;}
+        .file-modal-fallback i{display:block;font-size:2rem;color:var(--primary);margin-bottom:10px;}
+        @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+        .modal-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto 12px;}
+        .modal-title{font-size:.95rem;font-weight:800;text-align:center;margin-bottom:5px;}
+        .modal-msg{font-size:.8rem;color:var(--text-muted);text-align:center;margin-bottom:20px;line-height:1.6;}
+        .modal-actions{display:flex;gap:10px;}
+        .modal-cancel{flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);}
+        .modal-cancel:hover{background:#f8fafc;}
+        .modal-confirm-danger{flex:1;padding:9px;border-radius:8px;border:none;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;}
+        .modal-confirm-danger:hover{background:#dc2626;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+        /* Student Detail stays profile-focused. Task actions live in the sidebar. */
+        .detail-grid{grid-template-columns:1fr;}
+        .detail-grid > div:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+        .detail-grid > div:first-child > .section-card{margin-bottom:0;}
+        .task-section{display:none;}
+        .detail-grid > div:nth-child(2){display:none;}
+
+        @media(max-width:900px){.detail-grid > div:first-child{grid-template-columns:1fr;}}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}}
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Learning Management System</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="{% url 'dashboard' %}" class="nav-item"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">Management</div>
+        <a href="{% url 'student_list' %}" class="nav-item active"><i class="bi bi-people-fill"></i> Students</a>
+        <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'teacher_feedback' %}?student={{ student.id }}" class="nav-item"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
+        <div class="nav-label">Tasks</div>
+        <a href="{% url 'assign_task' %}" class="nav-item"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
+        <a href="{% url 'task_history' %}" class="nav-item"><i class="bi bi-journal-text"></i> Task History &amp; Evaluation</a>
+        <div class="nav-label">Monitoring</div>
+        <a href="{% url 'student_monitoring' %}" class="nav-item"><i class="bi bi-activity"></i> Activity Monitor</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">{{ user.username|first|upper }}</div>
+            <div>
+                <div class="user-name">{{ user.username }}</div>
+                <div class="user-role">Teacher</div>
+            </div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn">
+            <i class="bi bi-box-arrow-left"></i> Sign Out
+        </a>
+    </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <a href="{% url 'student_list' %}" class="topbar-back">
+            <i class="bi bi-arrow-left"></i> Back to Students
+        </a>
+        <div class="topbar-title">Student Detail</div>
+        <div class="topbar-chip">
+            <i class="bi bi-person-circle"></i> {{ student.name }}
+        </div>
+    </div>
+
+    <div class="page-content">
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert-success-custom"><i class="bi bi-check-circle-fill"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- ── Profile Hero ── -->
+        <div class="profile-hero">
+            <div class="hero-avatar">
+                {% if student.profile_picture %}
+                    <img src="{{ student.profile_picture.url }}" alt="{{ student.name }}">
+                {% else %}
+                    {{ student.name|first|upper }}
+                {% endif %}
+            </div>
+            <div>
+                <div class="hero-name">{{ student.name }}</div>
+                <div class="hero-sub">
+                    {% if student.age %}<span><i class="bi bi-calendar3" style="font-size:.7rem;"></i> Age {{ student.age }}</span>{% endif %}
+                    {% if student.learning_level == 'beginner' %}<span class="badge badge-amber">🌱 Beginner</span>
+                    {% elif student.learning_level == 'developing' %}<span class="badge badge-blue">📈 Developing</span>
+                    {% elif student.learning_level == 'independent' %}<span class="badge badge-green">⭐ Independent</span>{% endif %}
+                    {% if student.grading_type == 'graded' %}<span class="badge badge-blue">📊 Graded</span>
+                    {% elif student.grading_type == 'ungraded' %}<span class="badge badge-purple">🌟 Progress-Based</span>{% endif %}
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a href="{% url 'edit_student' student.id %}" class="btn-edit">
+                    <i class="bi bi-pencil-fill"></i> Edit
+                </a>
+                <button class="btn-delete-student"
+                        onclick="openStudentDeleteModal('{% url 'delete_student' student.id %}', '{{ student.name|escapejs }}')">
+                    <i class="bi bi-trash-fill"></i> Delete
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Two-column grid ── -->
+        <div class="detail-grid">
+
+            <!-- LEFT COLUMN -->
+            <div>
+                <!-- Student Info -->
+                <div class="section-card">
+                    <div class="section-head">
+                        <div class="section-head-left">
+                            <div class="section-icon si-blue"><i class="bi bi-person-fill"></i></div>
+                            <div>
+                                <div class="section-title">Student Info</div>
+                                <div class="section-sub">Personal & contact details</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="info-row">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">{{ student.name }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">LRN</div>
+                            <div class="info-value" style="font-family:monospace;letter-spacing:.5px;">{{ student.lrn|default:"—" }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Age</div>
+                            <div class="info-value">{{ student.age|default:"—" }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Learning Level</div>
+                            <div class="info-value">
+                                {% if student.learning_level == 'beginner' %}<span class="badge badge-amber">🌱 Beginner</span>
+                                {% elif student.learning_level == 'developing' %}<span class="badge badge-blue">📈 Developing</span>
+                                {% elif student.learning_level == 'independent' %}<span class="badge badge-green">⭐ Independent</span>
+                                {% else %}—{% endif %}
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Assessment</div>
+                            <div class="info-value">
+                                {% if student.grading_type == 'graded' %}<span class="badge badge-blue">📊 Graded</span>
+                                {% elif student.grading_type == 'ungraded' %}<span class="badge badge-purple">🌟 Progress-Based</span>
+                                {% else %}—{% endif %}
+                            </div>
+                        </div>
+                        {% if student.grading_type == 'ungraded' and student.progress_status %}
+                        <div class="info-row">
+                            <div class="info-label">Progress</div>
+                            <div class="info-value">
+                                {% if student.progress_status == 'on_track' %}<span class="badge badge-green">✓ On Track</span>
+                                {% elif student.progress_status == 'needs_support' %}<span class="badge badge-amber">⚠ Needs Support</span>
+                                {% elif student.progress_status == 'excelling' %}<span class="badge badge-blue">★ Excelling</span>{% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="info-row">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ student.email|default:"—" }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value">{{ student.phone_number|default:"—" }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Address</div>
+                            <div class="info-value">{{ student.address|default:"—" }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Enrolled</div>
+                            <div class="info-value">{{ student.enrolled_date|default:"—" }}</div>
+                        </div>
+                        {% if student.birth_certificate %}
+                        <div class="info-row">
+                            <div class="info-label">Birth Cert.</div>
+                            <div class="info-value" style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button type="button" onclick="openBirthCertModal('{{ student.birth_certificate.url }}')"
+                                   style="display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:.78rem;font-weight:700;color:var(--primary);text-decoration:none;padding:4px 10px;border-radius:7px;border:1.5px solid #bfdbfe;background:var(--primary-light);cursor:pointer;">
+                                    <i class="bi bi-eye"></i> View File
+                                </button>
+                                <a href="{{ student.birth_certificate.url }}" download
+                                   style="display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;color:#065f46;text-decoration:none;padding:4px 10px;border-radius:7px;border:1.5px solid #a7f3d0;background:#ecfdf5;">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Skills Progress (progress-based only) -->
+                {% if student.grading_type == 'ungraded' %}
+                <div class="section-card">
+                    <div class="section-head">
+                        <div class="section-head-left">
+                            <div class="section-icon si-purple"><i class="bi bi-graph-up-arrow"></i></div>
+                            <div>
+                                <div class="section-title">Skills Progress</div>
+                                <div class="section-sub">Tracked skill areas</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding:14px 18px;">
+                        {% with skills=student %}
+                        {% for label, val in  skill_progress.items %}
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                                <div style="font-size:.77rem;font-weight:700;color:var(--text);">{{ label }}</div>
+                                <div style="font-size:.72rem;font-weight:800;color:var(--text-muted);">{{ val }}%</div>
+                            </div>
+                            <div style="height:6px;border-radius:20px;background:#f1f5f9;overflow:hidden;">
+                                <div style="height:100%;border-radius:20px;background:var(--primary);width:{{ val }}%;transition:width .6s ease;"></div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <!-- fallback: render individual fields -->
+                        {% if student.progress_communication is not None %}
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><div style="font-size:.77rem;font-weight:700;">💬 Communication</div><div style="font-size:.72rem;font-weight:800;color:var(--text-muted);">{{ student.progress_communication }}%</div></div>
+                            <div style="height:6px;border-radius:20px;background:#f1f5f9;overflow:hidden;"><div style="height:100%;border-radius:20px;background:var(--primary);width:{{ student.progress_communication }}%;"></div></div>
+                        </div>
+                        {% endif %}
+                        {% if student.progress_motor is not None %}
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><div style="font-size:.77rem;font-weight:700;">🤸 Motor Skills</div><div style="font-size:.72rem;font-weight:800;color:var(--text-muted);">{{ student.progress_motor }}%</div></div>
+                            <div style="height:6px;border-radius:20px;background:#f1f5f9;overflow:hidden;"><div style="height:100%;border-radius:20px;background:var(--success);width:{{ student.progress_motor }}%;"></div></div>
+                        </div>
+                        {% endif %}
+                        {% if student.progress_social is not None %}
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><div style="font-size:.77rem;font-weight:700;">👥 Social Skills</div><div style="font-size:.72rem;font-weight:800;color:var(--text-muted);">{{ student.progress_social }}%</div></div>
+                            <div style="height:6px;border-radius:20px;background:#f1f5f9;overflow:hidden;"><div style="height:100%;border-radius:20px;background:var(--purple);width:{{ student.progress_social }}%;"></div></div>
+                        </div>
+                        {% endif %}
+                        {% if student.progress_selfcare is not None %}
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><div style="font-size:.77rem;font-weight:700;">🧴 Self-Care</div><div style="font-size:.72rem;font-weight:800;color:var(--text-muted);">{{ student.progress_selfcare }}%</div></div>
+                            <div style="height:6px;border-radius:20px;background:#f1f5f9;overflow:hidden;"><div style="height:100%;border-radius:20px;background:var(--warning);width:{{ student.progress_selfcare }}%;"></div></div>
+                        </div>
+                        {% endif %}
+                        {% if student.progress_academic is not None %}
+                        <div style="margin-bottom:0;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><div style="font-size:.77rem;font-weight:700;">📚 Academic Readiness</div><div style="font-size:.72rem;font-weight:800;color:var(--text-muted);">{{ student.progress_academic }}%</div></div>
+                            <div style="height:6px;border-radius:20px;background:#f1f5f9;overflow:hidden;"><div style="height:100%;border-radius:20px;background:var(--success);width:{{ student.progress_academic }}%;"></div></div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Add Task Form -->
+                <div class="section-card task-section">
+                    <div class="section-head">
+                        <div class="section-head-left">
+                            <div class="section-icon si-teal"><i class="bi bi-plus-circle-fill"></i></div>
+                            <div>
+                                <div class="section-title">Add Task</div>
+                                <div class="section-sub">Assign a new task to {{ student.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="task">
+                            <div class="f-group">
+                                <label class="f-label">Task Title <span class="f-req">*</span></label>
+                                <input type="text" name="title" required placeholder="e.g. Watch Video on Colors">
+                            </div>
+                            <div class="f-group">
+                                <label class="f-label">Description</label>
+                                <textarea name="description" placeholder="Instructions for the student…"></textarea>
+                            </div>
+                            <div class="f-group">
+                                <label class="f-label">Deadline <span class="f-req">*</span></label>
+                                <input type="datetime-local" name="deadline" required>
+                            </div>
+                            <div class="f-group">
+                                <label class="f-label"><i class="bi bi-youtube" style="color:#ef4444;"></i> YouTube / Video Link</label>
+                                <input type="url" name="video_url" placeholder="https://youtube.com/…">
+                            </div>
+                            <div class="f-group">
+                                <label class="f-label"><i class="bi bi-camera-video-fill"></i> Upload Video File</label>
+                                <input type="file" name="video_file" accept="video/*">
+                            </div>
+                            <div class="f-group">
+                                <label class="f-label"><i class="bi bi-paperclip"></i> Attach File</label>
+                                <input type="file" name="attachment">
+                            </div>
+                            <button type="submit" class="btn-submit">
+                                <i class="bi bi-plus-lg"></i> Add Task
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div>
+                <!-- Active Tasks -->
+                <div class="section-card">
+                    <div class="section-head">
+                        <div class="section-head-left">
+                            <div class="section-icon si-amber"><i class="bi bi-clipboard-fill"></i></div>
+                            <div>
+                                <div class="section-title">Tasks</div>
+                                <div class="section-sub">Active and pending assignments</div>
+                            </div>
+                        </div>
+                        <div class="section-count">{{ tasks|length }} total</div>
+                    </div>
+                    <div class="task-list">
+                        {% for task in tasks %}
+                        <div class="task-item {% if task.status == 'completed' %}completed{% elif task.deadline < now %}overdue{% endif %}">
+                            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+                                <div style="flex:1;min-width:0;">
+                                    <div class="task-title">{{ task.title }}</div>
+                                    {% if task.description %}
+                                    <div class="task-desc">{{ task.description }}</div>
+                                    {% endif %}
+                                </div>
+                                {% if task.status == 'completed' %}
+                                    <span class="badge badge-green" style="flex-shrink:0;"><i class="bi bi-check-circle-fill"></i> Done</span>
+                                {% elif task.deadline < now %}
+                                    <span class="badge badge-red" style="flex-shrink:0;"><i class="bi bi-exclamation-circle-fill"></i> Overdue</span>
+                                {% else %}
+                                    <span class="badge badge-amber" style="flex-shrink:0;"><i class="bi bi-clock-fill"></i> Pending</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="task-meta"><i class="bi bi-calendar3"></i> Deadline: <strong>{{ task.deadline|date:"M d, Y h:i A" }}</strong></div>
+                            {% if task.video_url %}
+                            <div class="task-meta"><i class="bi bi-play-circle-fill" style="color:var(--danger);"></i> <a href="{{ task.video_url }}" target="_blank">Watch Video</a></div>
+                            {% endif %}
+                            {% if task.video_file %}
+                            <div class="task-meta"><i class="bi bi-camera-video-fill" style="color:var(--purple);"></i> <a href="{{ task.video_file.url }}" target="_blank">Watch Uploaded Video</a></div>
+                            {% endif %}
+                            {% if task.attachment %}
+                            <div class="task-meta"><i class="bi bi-paperclip"></i> <a href="{{ task.attachment.url }}" target="_blank">View Attachment</a></div>
+                            {% endif %}
+                            {% if task.status == 'completed' %}
+                            <div class="task-meta" style="color:var(--success);"><i class="bi bi-check-circle-fill"></i> Completed: {{ task.completed_at|date:"M d, Y h:i A" }}</div>
+                            {% if task.output_file %}
+                            <div class="task-meta"><i class="bi bi-upload"></i> <a href="{{ task.output_file.url }}" target="_blank">View Student Output</a></div>
+                            {% endif %}
+                            {% endif %}
+
+                            <div class="task-footer">
+                                <div class="task-meta" style="margin:0;">
+                                    <i class="bi bi-clock" style="font-size:.7rem;"></i>
+                                    Added {{ task.created_at|date:"M d, Y" }}
+                                </div>
+                                <div class="task-actions">
+                                    <a href="{% url 'edit_task' task.id %}" class="task-btn edit">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <form method="POST" action="{% url 'delete_task' task.id %}"
+                                          id="delTask-{{ task.id }}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="button" class="task-btn del"
+                                                onclick="openTaskDeleteModal('delTask-{{ task.id }}', '{{ task.title|escapejs }}')">
+                                            <i class="bi bi-trash-fill"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="bi bi-clipboard"></i>
+                            <p>No tasks yet. Add one using the form.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Task History -->
+                <div class="section-card">
+                    <div class="section-head">
+                        <div class="section-head-left">
+                            <div class="section-icon si-purple"><i class="bi bi-journal-text"></i></div>
+                            <div>
+                                <div class="section-title">Task History</div>
+                                <div class="section-sub">All tasks log</div>
+                            </div>
+                        </div>
+                        <div class="section-count">{{ tasks|length }} total task{{ tasks|length|pluralize }}</div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Task Name</th>
+                                    <th>Date Created</th>
+                                    <th>Deadline</th>
+                                    <th>Status</th>
+                                    <th>Completed On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in tasks %}
+                                <tr>
+                                    <td style="font-weight:700;color:var(--text);">{{ task.title }}</td>
+                                    <td style="color:var(--text-muted);">{{ task.created_at|date:"M d, Y" }}</td>
+                                    <td style="color:var(--text-muted);white-space:nowrap;">{{ task.deadline|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if task.status == 'completed' %}
+                                            <span class="badge badge-green"><i class="bi bi-check-circle-fill"></i> Completed</span>
+                                        {% elif task.deadline < now %}
+                                            <span class="badge badge-red"><i class="bi bi-exclamation-circle-fill"></i> Overdue</span>
+                                        {% else %}
+                                            <span class="badge badge-amber"><i class="bi bi-clock-fill"></i> Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="color:var(--text-muted);white-space:nowrap;">
+                                        {% if task.status == 'completed' %}{{ task.completed_at|date:"M d, Y" }}{% else %}—{% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" style="padding:28px;text-align:center;color:var(--text-muted);font-size:.82rem;">No tasks recorded yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="birthCertModal">
+    <div class="file-modal-box">
+        <div class="file-modal-head">
+            <i class="bi bi-file-earmark-text-fill" style="color:var(--primary);"></i>
+            <div class="file-modal-title">Birth Certificate Preview</div>
+            <div class="file-modal-actions">
+                {% if student.birth_certificate %}
+                <a href="{{ student.birth_certificate.url }}" download
+                   style="display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;color:#065f46;text-decoration:none;padding:7px 10px;border-radius:8px;border:1.5px solid #a7f3d0;background:#ecfdf5;">
+                    <i class="bi bi-download"></i> Download
+                </a>
+                {% endif %}
+                <button type="button" class="file-modal-close" onclick="closeBirthCertModal()" aria-label="Close preview">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="file-modal-body">
+            <img id="birthCertImage" class="file-modal-image" alt="Birth certificate preview">
+            <iframe id="birthCertFrame" class="file-modal-frame" title="Birth certificate preview"></iframe>
+            <div id="birthCertFallback" class="file-modal-fallback">
+                <i class="bi bi-file-earmark-arrow-down"></i>
+                This file cannot be previewed in the browser. Please use Download.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Delete Task Modal ── -->
+<div class="modal-overlay" id="taskDeleteModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:#fef2f2;color:var(--danger);"><i class="bi bi-trash-fill"></i></div>
+        <div class="modal-title">Delete Task?</div>
+        <div class="modal-msg" id="taskDeleteMsg">Are you sure you want to delete this task? This cannot be undone.</div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeTaskDeleteModal()">Cancel</button>
+            <button class="modal-confirm-danger" id="taskDeleteConfirm">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Delete Student Modal ── -->
+<div class="modal-overlay" id="studentDeleteModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:#fef2f2;color:var(--danger);"><i class="bi bi-person-x-fill"></i></div>
+        <div class="modal-title">Delete Student?</div>
+        <div class="modal-msg" id="studentDeleteMsg">This will permanently delete the student and all their data.</div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeStudentDeleteModal()">Cancel</button>
+            <a href="#" id="studentDeleteLink" class="modal-confirm-danger" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                Yes, Delete
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ── Sign Out Modal ── -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem;">🚪</div>
+        <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:5px;">Sign Out?</div>
+        <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">Are you sure you want to sign out of Inclusive Classroom?</div>
+        <div style="display:flex;gap:10px;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);">Cancel</button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:9px;border-radius:8px;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;text-decoration:none;display:flex;align-items:center;justify-content:center;">Yes, Sign Out</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* Task delete modal */
+    function openTaskDeleteModal(formId, name) {
+        document.getElementById('taskDeleteMsg').textContent =
+            'Are you sure you want to delete "' + name + '"? This cannot be undone.';
+        document.getElementById('taskDeleteConfirm').onclick = function() {
+            document.getElementById(formId).submit();
+        };
+        document.getElementById('taskDeleteModal').classList.add('show');
+    }
+    function closeTaskDeleteModal() {
+        document.getElementById('taskDeleteModal').classList.remove('show');
+    }
+    document.getElementById('taskDeleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeTaskDeleteModal();
+    });
+
+    /* Student delete modal */
+    function openStudentDeleteModal(url, name) {
+        document.getElementById('studentDeleteMsg').textContent =
+            'Are you sure you want to delete ' + name + '? All tasks and data will be permanently removed.';
+        document.getElementById('studentDeleteLink').href = url;
+        document.getElementById('studentDeleteModal').classList.add('show');
+    }
+    function closeStudentDeleteModal() {
+        document.getElementById('studentDeleteModal').classList.remove('show');
+    }
+    document.getElementById('studentDeleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeStudentDeleteModal();
+    });
+
+    function openBirthCertModal(url) {
+        const cleanUrl = String(url || '').split('?')[0].toLowerCase();
+        const frame = document.getElementById('birthCertFrame');
+        const image = document.getElementById('birthCertImage');
+        const fallback = document.getElementById('birthCertFallback');
+
+        frame.style.display = 'none';
+        image.style.display = 'none';
+        fallback.style.display = 'none';
+        frame.src = '';
+        image.src = '';
+
+        if (/\.(png|jpe?g|gif|webp)$/i.test(cleanUrl)) {
+            image.src = url;
+            image.style.display = 'block';
+        } else if (/\.pdf$/i.test(cleanUrl)) {
+            frame.src = url;
+            frame.style.display = 'block';
+        } else {
+            fallback.style.display = 'block';
+        }
+        document.getElementById('birthCertModal').classList.add('show');
+    }
+    function closeBirthCertModal() {
+        document.getElementById('birthCertModal').classList.remove('show');
+        document.getElementById('birthCertFrame').src = '';
+        document.getElementById('birthCertImage').src = '';
+    }
+    document.getElementById('birthCertModal').addEventListener('click', function(e) {
+        if (e.target === this) closeBirthCertModal();
+    });
+
+    /* Logout modal backdrop */
+    document.getElementById('logoutModal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+</script>
+</body>
+</html>

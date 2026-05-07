@@ -1,0 +1,439 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Monitoring - Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+            --success:#10b981; --success-light:#ecfdf5;
+            --danger:#ef4444; --danger-light:#fef2f2;
+            --warning:#f59e0b; --warning-light:#fffbeb;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        /* ── Sidebar ── */
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:.58rem;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:.58rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#64748b;font-weight:600;font-size:.82rem;text-decoration:none;transition:all .15s;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+        .nav-item.active{background:var(--primary);color:white;}
+        .nav-item i{font-size:.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:.78rem;font-weight:700;color:white;}
+        .user-role{font-size:.63rem;color:#475569;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
+
+        /* ── Layout ── */
+        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+        .topbar-left{display:flex;align-items:center;gap:10px;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .live-badge{display:inline-flex;align-items:center;gap:5px;background:var(--success-light);color:var(--success);border-radius:20px;padding:4px 11px;font-size:.72rem;font-weight:700;}
+        .live-dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 1.8s ease-in-out infinite;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+        .page-content{padding:22px 26px;}
+
+        /* ── Stat Cards ── */
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+        .stat-card{background:white;border-radius:12px;padding:18px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;transition:all .2s;}
+        .stat-card:hover{box-shadow:0 5px 20px rgba(0,0,0,.07);transform:translateY(-2px);}
+        .stat-icon{width:44px;height:44px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+        .si-green{background:var(--success-light);color:var(--success);}
+        .si-blue{background:var(--primary-light);color:var(--primary);}
+        .si-amber{background:var(--warning-light);color:var(--warning);}
+        .stat-value{font-size:1.75rem;font-weight:800;line-height:1;font-family:'Fraunces',serif;}
+        .stat-label{font-size:.73rem;color:var(--text-muted);font-weight:600;margin-top:2px;}
+
+        /* ── Two-column grid ── */
+        .monitor-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:16px;}
+
+        /* ── Panel card ── */
+        .panel{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+        .panel-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .panel-head-left{display:flex;align-items:center;gap:8px;}
+        .panel-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0;}
+        .pi-green{background:var(--success-light);color:var(--success);}
+        .pi-blue{background:var(--primary-light);color:var(--primary);}
+        .panel-title{font-size:.85rem;font-weight:800;}
+        .panel-count{font-size:.72rem;color:var(--text-muted);font-weight:600;background:var(--bg);border-radius:20px;padding:2px 9px;}
+
+        /* ── Online student rows ── */
+        .online-list{max-height:420px;overflow-y:auto;}
+        .online-item{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background .12s;}
+        .online-item:last-child{border-bottom:none;}
+        .online-item:hover{background:#f8fafc;}
+        .s-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;overflow:hidden;}
+        .s-avatar img{width:100%;height:100%;object-fit:cover;}
+        .s-name{font-size:.84rem;font-weight:700;color:var(--text);}
+        .s-sub{font-size:.71rem;color:var(--text-muted);margin-top:1px;}
+        .online-indicator{display:flex;align-items:center;gap:4px;font-size:.7rem;font-weight:700;color:var(--success);}
+        .online-dot{width:7px;height:7px;border-radius:50%;background:var(--success);}
+        .empty-state{padding:40px;text-align:center;color:var(--text-muted);}
+        .empty-state i{font-size:2rem;opacity:.18;display:block;margin-bottom:10px;}
+        .empty-state p{font-size:.82rem;font-weight:600;margin:0;}
+
+        /* ── Filters ── */
+        .filter-bar{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#f8fafc;}
+        .f-input{padding:7px 11px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:.82rem;font-weight:500;outline:none;background:white;color:var(--text);transition:border .15s;}
+        .f-input:focus{border-color:var(--primary);}
+        .f-input[type=text]{flex:1;min-width:160px;}
+        .btn-filter{padding:7px 14px;border-radius:8px;background:var(--primary);color:white;border:none;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s;}
+        .btn-filter:hover{background:var(--primary-dark);}
+        .btn-clear{padding:7px 13px;border-radius:8px;background:white;color:var(--text-muted);border:1.5px solid var(--border);font-family:inherit;font-size:.82rem;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:5px;transition:all .15s;}
+        .btn-clear:hover{border-color:#94a3b8;color:var(--text);}
+
+        /* ── Session Log Table ── */
+        .log-wrap{overflow-x:auto;max-height:440px;overflow-y:auto;}
+        table{width:100%;border-collapse:collapse;}
+        thead th{padding:9px 14px;background:#f8fafc;font-size:.67rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;}
+        thead th:first-child{padding-left:18px;}
+        thead th:last-child{padding-right:18px;}
+        tbody tr:hover{background:#f8fafc;}
+        tbody tr:not(:last-child) td{border-bottom:1px solid var(--border);}
+        tbody td{padding:11px 14px;font-size:.82rem;vertical-align:middle;}
+        tbody td:first-child{padding-left:18px;}
+        tbody td:last-child{padding-right:18px;}
+        .badge-online{display:inline-flex;align-items:center;gap:4px;background:var(--success-light);color:#065f46;border-radius:20px;padding:2px 9px;font-size:.67rem;font-weight:700;}
+        .badge-offline{display:inline-flex;align-items:center;gap:4px;background:var(--bg);color:var(--text-muted);border-radius:20px;padding:2px 9px;font-size:.67rem;font-weight:700;}
+        .dur-pill{font-size:.72rem;color:var(--text-muted);font-style:italic;}
+        .no-rows td{padding:36px;text-align:center;color:var(--text-muted);font-size:.82rem;font-weight:600;}
+
+        /* ── Animations ── */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .stat-card:nth-child(1){animation:fadeUp .3s ease .05s both}
+        .stat-card:nth-child(2){animation:fadeUp .3s ease .1s both}
+        .stat-card:nth-child(3){animation:fadeUp .3s ease .15s both}
+        .monitor-grid{animation:fadeUp .3s ease .2s both}
+
+        @media(max-width:900px){.monitor-grid{grid-template-columns:1fr}}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stats-grid{grid-template-columns:1fr 1fr}}
+    </style>
+</head>
+<body>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Learning Management System</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="{% url 'dashboard' %}" class="nav-item"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">Management</div>
+        <a href="{% url 'student_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> Students</a>
+        <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'teacher_feedback' %}" class="nav-item"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
+        <div class="nav-label">Tasks</div>
+        <a href="{% url 'assign_task' %}" class="nav-item"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
+        <a href="{% url 'task_history' %}" class="nav-item"><i class="bi bi-journal-text"></i> Task History &amp; Evaluation</a>
+        <div class="nav-label">Monitoring</div>
+        <a href="{% url 'student_monitoring' %}" class="nav-item active"><i class="bi bi-activity"></i> Activity Monitor</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">{{ user.username|first|upper }}</div>
+            <div><div class="user-name">{{ user.username }}</div><div class="user-role">Teacher</div></div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn">
+            <i class="bi bi-box-arrow-left"></i> Sign Out
+        </a>
+    </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main class="main">
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="topbar-title">Student Activity Monitor</div>
+            <span class="live-badge"><span class="live-dot"></span> Live</span>
+        </div>
+        <span style="font-size:.78rem;color:var(--text-muted);font-weight:600;">
+            Auto-refreshes every 5s &nbsp;<i class="bi bi-arrow-clockwise" id="refresh-icon"></i>
+        </span>
+    </div>
+
+    <div class="page-content">
+
+        <!-- ── Stat Cards ── -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon si-green"><i class="bi bi-wifi"></i></div>
+                <div>
+                    <div class="stat-value" id="stat-online">{{ online_count }}</div>
+                    <div class="stat-label">Students Online Now</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-blue"><i class="bi bi-people-fill"></i></div>
+                <div>
+                    <div class="stat-value" id="stat-total">{{ total_students }}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-amber"><i class="bi bi-clock-history"></i></div>
+                <div>
+                    <div class="stat-value">{{ sessions|length }}</div>
+                    <div class="stat-label">Sessions (Filtered)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Two-column grid ── -->
+        <div class="monitor-grid">
+
+            <!-- LEFT: Currently Online -->
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-head-left">
+                        <div class="panel-icon pi-green"><i class="bi bi-wifi"></i></div>
+                        <div class="panel-title">Currently Online</div>
+                    </div>
+                    <span class="panel-count" id="online-badge">{{ online_count }} active</span>
+                </div>
+                <div class="online-list" id="online-list">
+                    {% if online_students %}
+                        {% for entry in online_students %}
+                        <div class="online-item">
+                            <div class="s-avatar">
+                                {% if entry.student.profile_picture %}
+                                    <img src="{{ entry.student.profile_picture.url }}" alt="{{ entry.student.name }}">
+                                {% else %}
+                                    {{ entry.student.name|first|upper }}
+                                {% endif %}
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="s-name">{{ entry.student.name }}</div>
+                                <div class="s-sub">LRN: {{ entry.student.lrn|default:"—" }}</div>
+                            </div>
+                            <div>
+                                <div class="online-indicator">
+                                    <span class="online-dot"></span> Online
+                                </div>
+                                <div style="font-size:.68rem;color:var(--text-muted);margin-top:2px;text-align:right;">
+                                    since {{ entry.login_time|time:"h:i:s A" }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-wifi-off"></i>
+                            <p>No students online right now.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- RIGHT: Login History -->
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-head-left">
+                        <div class="panel-icon pi-blue"><i class="bi bi-clock-history"></i></div>
+                        <div class="panel-title">Login History</div>
+                    </div>
+                </div>
+
+                <!-- Filter bar -->
+                <form method="GET" class="filter-bar">
+                    <input type="text" name="q" value="{{ search_filter }}" class="f-input"
+                           placeholder="Search by name…">
+                    <input type="date" name="date" value="{{ date_filter }}" class="f-input"
+                           style="width:150px;">
+                    <button type="submit" class="btn-filter">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    {% if date_filter or search_filter %}
+                    <a href="{% url 'student_monitoring' %}" class="btn-clear">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </a>
+                    {% endif %}
+                </form>
+
+                <!-- Table -->
+                <div class="log-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Date</th>
+                                <th>Login</th>
+                                <th>Logout</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if sessions %}
+                                {% for session in sessions %}
+                                <tr>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:9px;">
+                                            <div class="s-avatar" style="width:30px;height:30px;font-size:.72rem;flex-shrink:0;">
+                                                {% if session.student.profile_picture %}
+                                                    <img src="{{ session.student.profile_picture.url }}" alt="">
+                                                {% else %}
+                                                    {{ session.student.name|first|upper }}
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:700;font-size:.82rem;">{{ session.student.name }}</div>
+                                                <div style="font-size:.68rem;color:var(--text-muted);">{{ session.student.lrn|default:"—" }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color:var(--text-muted);font-size:.78rem;white-space:nowrap;">
+                                        {{ session.login_time|date:"M d, Y" }}
+                                    </td>
+                                    <td style="font-weight:600;white-space:nowrap;">
+                                        {{ session.login_time|time:"h:i:s A" }}
+                                    </td>
+                                    <td style="white-space:nowrap;">
+                                        {% if session.logout_time %}
+                                            {{ session.logout_time|time:"h:i:s A" }}
+                                        {% else %}
+                                            <span style="font-size:.72rem;color:var(--success);font-weight:700;font-style:italic;">active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if session.duration %}
+                                            <span class="dur-pill">{{ session.duration }}</span>
+                                        {% else %}
+                                            <span class="dur-pill">ongoing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if session.logout_time %}
+                                            <span class="badge-offline"><i class="bi bi-circle"></i> Offline</span>
+                                        {% else %}
+                                            <span class="badge-online"><i class="bi bi-circle-fill"></i> Online</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr class="no-rows">
+                                    <td colspan="6">
+                                        <i class="bi bi-inbox" style="font-size:1.8rem;opacity:.18;display:block;margin-bottom:8px;"></i>
+                                        {% if date_filter or search_filter %}
+                                            No sessions match your filters.
+                                        {% else %}
+                                            No login activity recorded yet.
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- /monitor-grid -->
+    </div><!-- /page-content -->
+</main>
+
+<!-- ════════ Sign Out Modal ════════ -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;">🚪</div>
+        <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Sign Out?</h5>
+        <p style="font-size:.83rem;color:#64748b;margin:0 0 24px;">Are you sure you want to sign out of Inclusive Classroom?</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">
+                Cancel
+            </button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                Yes, Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Live polling ────────────────────────────────────────────────────────────
+const API_URL = "{% url 'monitoring_status_api' %}";
+
+function spinIcon() {
+    const icon = document.getElementById('refresh-icon');
+    icon.style.transition = 'transform 0.4s';
+    icon.style.transform = 'rotate(360deg)';
+    setTimeout(() => {
+        icon.style.transition = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }, 450);
+}
+
+function buildAvatarHTML(student) {
+    if (student.avatar) {
+        return `<img src="${student.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;">`;
+    }
+    return student.name.charAt(0).toUpperCase();
+}
+
+function refreshOnlinePanel() {
+    spinIcon();
+    fetch(API_URL)
+        .then(r => r.json())
+        .then(data => {
+            // Update stat cards
+            document.getElementById('stat-online').textContent = data.online_count;
+            document.getElementById('stat-total').textContent  = data.total_students;
+            document.getElementById('online-badge').textContent = data.online_count + ' active';
+
+            // Rebuild online list
+            const list = document.getElementById('online-list');
+            if (data.online_students.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-wifi-off"></i>
+                        <p>No students online right now.</p>
+                    </div>`;
+            } else {
+                list.innerHTML = data.online_students.map(s => `
+                    <div class="online-item">
+                        <div class="s-avatar">${buildAvatarHTML(s)}</div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="s-name">${s.name}</div>
+                            <div class="s-sub">Logged in at ${s.login_time}</div>
+                        </div>
+                        <div>
+                            <div class="online-indicator">
+                                <span class="online-dot"></span> Online
+                            </div>
+                        </div>
+                    </div>`).join('');
+            }
+        })
+        .catch(() => { /* silently fail — server may be restarting */ });
+}
+
+// Poll every 5 seconds AND run immediately on page load
+setInterval(refreshOnlinePanel, 5000);
+refreshOnlinePanel();
+</script>
+</body>
+</html>

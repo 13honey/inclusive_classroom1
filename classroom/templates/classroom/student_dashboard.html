@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+            --success:#10b981; --success-light:#ecfdf5;
+            --danger:#ef4444; --danger-light:#fef2f2;
+            --warning:#f59e0b; --warning-light:#fffbeb;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        /* SIDEBAR */
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:.58rem;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:.58rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#64748b;font-weight:600;font-size:.82rem;text-decoration:none;transition:all .15s;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+        .nav-item.active{background:var(--primary);color:white;}
+        .nav-item i{font-size:.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0;}
+        .user-avatar-fallback{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:.78rem;font-weight:700;color:white;}
+        .user-role{font-size:.63rem;color:#475569;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
+
+        /* LAYOUT */
+        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .page-content{padding:22px 26px;}
+
+        /* HERO */
+        .hero{background:linear-gradient(135deg,#1d4ed8 0%,#4f46e5 50%,#7c3aed 100%);border-radius:16px;padding:26px 30px;color:white;position:relative;overflow:hidden;margin-bottom:20px;}
+        .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.05);}
+        .hero-inner{position:relative;z-index:1;display:flex;align-items:center;gap:18px;}
+        .hero-avatar{width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.35);flex-shrink:0;}
+        .hero-avatar-fallback{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:800;color:white;flex-shrink:0;}
+        .hero-name{font-family:'Fraunces',serif;font-size:1.45rem;font-weight:800;margin-bottom:5px;}
+        .hero-meta{font-size:.8rem;opacity:.85;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+        .hero-tag{background:rgba(255,255,255,.15);border-radius:20px;padding:2px 9px;font-size:.68rem;font-weight:700;}
+
+        /* STATS */
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+        .stat-card{background:white;border-radius:12px;padding:16px 18px;border:1px solid var(--border);display:flex;align-items:center;gap:13px;transition:all .2s;}
+        .stat-card:hover{box-shadow:0 5px 20px rgba(0,0,0,.07);transform:translateY(-2px);}
+        .stat-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.05rem;}
+        .si-blue{background:#eff6ff;color:var(--primary);} .si-green{background:var(--success-light);color:var(--success);} .si-amber{background:var(--warning-light);color:var(--warning);}
+        .stat-value{font-size:1.65rem;font-weight:800;line-height:1;font-family:'Fraunces',serif;}
+        .stat-label{font-size:.72rem;color:var(--text-muted);font-weight:600;margin-top:2px;}
+
+        /* DASHBOARD GRID */
+        .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+        /* PROFILE SUMMARY CARD */
+        .summary-card{background:white;border-radius:13px;border:1px solid var(--border);overflow:hidden;}
+        .summary-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .summary-head-title{font-size:.88rem;font-weight:800;display:flex;align-items:center;gap:6px;}
+        .summary-head-title i{color:var(--primary);}
+        .view-link{font-size:.72rem;font-weight:700;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:3px;}
+        .view-link:hover{text-decoration:underline;}
+        .summary-body{padding:16px 18px;}
+        .s-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;}
+        .s-row:last-child{border-bottom:none;}
+        .s-icon{width:26px;flex-shrink:0;color:var(--text-muted);font-size:.82rem;text-align:center;}
+        .s-label{font-size:.63rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;min-width:90px;}
+        .s-value{font-size:.82rem;font-weight:600;color:var(--text);flex:1;}
+        .badge-pill{display:inline-flex;align-items:center;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:700;margin:1px;}
+        .badge-hearing{background:#fce7f3;color:#be185d;} .badge-visual{background:#d1fae5;color:#065f46;}
+        .badge-down{background:#fef3c7;color:#92400e;} .badge-multiple{background:#ede9fe;color:#5b21b6;}
+        .assess-badge{display:inline-flex;align-items:center;gap:4px;background:#f5f3ff;color:#5b21b6;border-radius:20px;padding:3px 9px;font-size:.68rem;font-weight:700;}
+        .assess-badge-graded{background:var(--primary-light);color:var(--primary);}
+
+        /* TASK PROGRESS CARD */
+        .progress-card{background:white;border-radius:13px;border:1px solid var(--border);overflow:hidden;}
+        .progress-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .progress-head-title{font-size:.88rem;font-weight:800;display:flex;align-items:center;gap:6px;}
+        .progress-head-title i{color:var(--success);}
+        .progress-body{padding:16px 18px;}
+        .prog-stat{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+        .prog-label{font-size:.78rem;font-weight:700;color:var(--text);}
+        .prog-val{font-size:.78rem;font-weight:800;color:var(--text-muted);}
+        .prog-bar-wrap{background:#f1f5f9;border-radius:20px;height:8px;overflow:hidden;margin-bottom:14px;}
+        .prog-bar{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--primary),#7c3aed);transition:width .6s ease;}
+        .prog-bar.green{background:linear-gradient(90deg,var(--success),#059669);}
+        .prog-bar.amber{background:linear-gradient(90deg,var(--warning),#d97706);}
+        .task-mini{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:.78rem;}
+        .task-mini:last-child{border-bottom:none;}
+        .task-mini-title{font-weight:700;color:var(--text);flex:1;margin-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .tm-done{display:inline-flex;align-items:center;gap:3px;background:var(--success-light);color:#065f46;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:700;}
+        .tm-pending{display:inline-flex;align-items:center;gap:3px;background:var(--warning-light);color:#92400e;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:700;}
+        .tm-overdue{display:inline-flex;align-items:center;gap:3px;background:var(--danger-light);color:#991b1b;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:700;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .hero{animation:fadeUp .3s ease both;}
+        .stat-card:nth-child(1){animation:fadeUp .3s ease .05s both}
+        .stat-card:nth-child(2){animation:fadeUp .3s ease .1s both}
+        .stat-card:nth-child(3){animation:fadeUp .3s ease .15s both}
+        .summary-card{animation:fadeUp .3s ease .2s both;}
+        .progress-card{animation:fadeUp .3s ease .25s both;}
+
+        @media(max-width:900px){.dash-grid{grid-template-columns:1fr}}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stats-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Learning Management System</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="{% url 'student_dashboard' %}" class="nav-item active"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">My Learning</div>
+        <a href="{% url 'student_profile' %}" class="nav-item"><i class="bi bi-person-circle"></i> My Profile</a>
+        <a href="{% url 'student_tasks' %}" class="nav-item"><i class="bi bi-list-task"></i> Task Wall</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            {% if student and student.profile_picture %}<img src="{{ student.profile_picture.url }}" class="user-avatar">
+            {% else %}<div class="user-avatar-fallback">{{ student.name|first|upper }}</div>{% endif %}
+            <div><div class="user-name">{{ student.name }}</div><div class="user-role">Student</div></div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="topbar-title">Dashboard</div>
+    </div>
+    <div class="page-content">
+
+        {% if student %}
+
+        <!-- HERO -->
+        <div class="hero">
+            <div class="hero-inner">
+                {% if student.profile_picture %}<img src="{{ student.profile_picture.url }}" class="hero-avatar">
+                {% else %}<div class="hero-avatar-fallback">{{ student.name|first }}</div>{% endif %}
+                <div>
+                    <div class="hero-name">Welcome, {{ student.name }}!</div>
+                    <div class="hero-meta">
+                        <span><i class="bi bi-book"></i> {{ student.grade_level }}</span>
+                        <span>·</span>
+                        <span><i class="bi bi-person-badge"></i> LRN: {{ student.lrn|default:"Not set" }}</span>
+                        {% if student.grading_type == 'ungraded' %}<span class="hero-tag">🌟 Progress-Based</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon si-blue"><i class="bi bi-list-task"></i></div><div><div class="stat-value">{{ total_tasks }}</div><div class="stat-label">Total Tasks</div></div></div>
+            <div class="stat-card"><div class="stat-icon si-green"><i class="bi bi-check-circle-fill"></i></div><div><div class="stat-value">{{ done_tasks }}</div><div class="stat-label">Completed</div></div></div>
+            <div class="stat-card"><div class="stat-icon si-amber"><i class="bi bi-clock-fill"></i></div><div><div class="stat-value">{{ pending_tasks }}</div><div class="stat-label">Pending</div></div></div>
+        </div>
+
+        <!-- DASHBOARD GRID: Profile Summary + Task Progress -->
+        <div class="dash-grid">
+
+            <!-- PROFILE SUMMARY (preview only, not full page) -->
+            <div class="summary-card">
+                <div class="summary-head">
+                    <div class="summary-head-title"><i class="bi bi-person-circle"></i> Profile Summary</div>
+                    <a href="{% url 'student_profile' %}" class="view-link">View Full <i class="bi bi-chevron-right"></i></a>
+                </div>
+                <div class="summary-body">
+                    <div class="s-row"><div class="s-icon"><i class="bi bi-mortarboard-fill"></i></div><div class="s-label">Learning Level</div><div class="s-value">{{ student.grade_level }}</div></div>
+                    <div class="s-row"><div class="s-icon"><i class="bi bi-graph-up"></i></div><div class="s-label">Assessment</div><div class="s-value">
+                        {% if student.grading_type == 'ungraded' %}
+                            <span class="assess-badge">🌟 Progress-Based</span>
+                        {% else %}
+                            <span class="assess-badge assess-badge-graded">📊 Graded</span>
+                        {% endif %}
+                    </div></div>
+                    <div class="s-row"><div class="s-icon"><i class="bi bi-envelope-fill"></i></div><div class="s-label">Email</div><div class="s-value" style="font-size:.78rem;">{{ student.email|default:"Not provided" }}</div></div>
+                    <div class="s-row"><div class="s-icon"><i class="bi bi-calendar-check-fill"></i></div><div class="s-label">Enrolled</div><div class="s-value">{{ student.enrolled_date }}</div></div>
+                </div>
+            </div>
+
+            <!-- TASK PROGRESS OVERVIEW (not full TaskWall) -->
+            <div class="progress-card">
+                <div class="progress-head">
+                    <div class="progress-head-title"><i class="bi bi-bar-chart-fill"></i> Task Progress</div>
+                    <a href="{% url 'student_tasks' %}" class="view-link">View All <i class="bi bi-chevron-right"></i></a>
+                </div>
+                <div class="progress-body">
+                    <!-- Overall progress bar -->
+                    {% if total_tasks > 0 %}
+                    <div class="prog-stat">
+                        <div class="prog-label">Overall Completion</div>
+                        <div class="prog-val">{{ done_tasks }}/{{ total_tasks }}</div>
+                    </div>
+                    <div class="prog-bar-wrap">
+                        <div class="prog-bar green" style="width:{% if total_tasks > 0 %}{% widthratio done_tasks total_tasks 100 %}%{% else %}0%{% endif %};"></div>
+                    </div>
+                    <!-- Pending progress bar -->
+                    <div class="prog-stat">
+                        <div class="prog-label">Pending Tasks</div>
+                        <div class="prog-val">{{ pending_tasks }}</div>
+                    </div>
+                    <div class="prog-bar-wrap">
+                        <div class="prog-bar amber" style="width:{% if total_tasks > 0 %}{% widthratio pending_tasks total_tasks 100 %}%{% else %}0%{% endif %};"></div>
+                    </div>
+                    <!-- Recent tasks preview (max 3) -->
+                    <div style="margin-top:4px;font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Recent Tasks</div>
+                    {% for task in recent_tasks %}
+                    <div class="task-mini">
+                        <div class="task-mini-title">{{ task.title }}</div>
+                        {% if task.status == 'completed' %}<span class="tm-done"><i class="bi bi-check-circle-fill"></i> Done</span>
+                        {% elif task.deadline < now %}<span class="tm-overdue"><i class="bi bi-exclamation-circle-fill"></i> Overdue</span>
+                        {% else %}<span class="tm-pending"><i class="bi bi-clock-fill"></i> Pending</span>{% endif %}
+                    </div>
+                    {% empty %}
+                    <div style="text-align:center;padding:16px;color:var(--text-muted);font-size:.78rem;">No tasks yet.</div>
+                    {% endfor %}
+                    {% else %}
+                    <div style="text-align:center;padding:28px 16px;color:var(--text-muted);">
+                        <i class="bi bi-inbox" style="font-size:2rem;opacity:.2;display:block;margin-bottom:8px;"></i>
+                        <div style="font-weight:700;font-size:.85rem;">No tasks assigned yet</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        {% else %}
+        <div style="padding:20px;background:#fffbeb;border-radius:12px;border:1px solid #fde68a;color:#92400e;font-weight:600;">
+            <i class="bi bi-exclamation-triangle-fill" style="margin-right:7px;"></i>No student record found. Please contact your teacher.
+        </div>
+        {% endif %}
+
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const HEARTBEAT_URL = "{% url 'student_heartbeat' %}?student={{ student.id }}";
+
+function sendHeartbeat() {
+    fetch(HEARTBEAT_URL, {credentials: 'same-origin'})
+        .then(r => r.json())
+        .then(data => {
+            if (!data.ok && window.studentHeartbeatTimer) {
+                clearInterval(window.studentHeartbeatTimer);
+            }
+        })
+        .catch(() => {});
+}
+
+sendHeartbeat();
+window.studentHeartbeatTimer = setInterval(sendHeartbeat, 30000);
+</script>
+<!-- Sign Out Confirmation Modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;">🚪</div>
+        <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Sign Out?</h5>
+        <p style="font-size:.83rem;color:#64748b;margin:0 0 24px;">Are you sure you want to sign out of Inclusive Classroom?</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">
+                Cancel
+            </button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                Yes, Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,927 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student – {{ student.name }} | Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+            --success:#10b981; --danger:#ef4444; --warning:#f59e0b;
+            --purple:#7c3aed; --purple-light:#f5f3ff;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        /* ── Sidebar (matches rest of system) ── */
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:.58rem;color:#334155;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:.58rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#64748b;font-weight:600;font-size:.82rem;text-decoration:none;transition:all .15s;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:#cbd5e1;}
+        .nav-item.active{background:var(--primary);color:white;}
+        .nav-item i{font-size:.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:.78rem;font-weight:700;color:white;}
+        .user-role{font-size:.63rem;color:#475569;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
+
+        /* ── Main layout ── */
+        .main{margin-left:var(--sidebar-w);min-height:100vh;padding-bottom:88px;}
+        .topbar{background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 26px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
+        .topbar-back{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:.82rem;font-weight:700;text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:white;transition:all .15s;}
+        .topbar-back:hover{background:var(--primary-light);color:var(--primary);border-color:#bfdbfe;}
+        .topbar-title{font-size:1.25rem;font-weight:800;line-height:1;}
+        .topbar-subtitle{font-size:.68rem;font-weight:600;color:var(--text-muted);margin-top:3px;}
+        .topbar-chip{display:flex;align-items:center;gap:6px;background:#f8fafc;color:var(--primary);border:1px solid #dbeafe;border-radius:20px;padding:3px 10px;font-size:.7rem;font-weight:700;margin-left:auto;}
+
+        .page-content{padding:16px 26px 24px;}
+        .student-preview{display:flex;align-items:center;gap:14px;background:white;border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:14px;box-shadow:0 8px 24px rgba(15,23,42,.04);}
+        .preview-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:3px solid #dbeafe;flex-shrink:0;}
+        .preview-avatar-fallback{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:white;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;flex-shrink:0;}
+        .preview-name{font-size:1rem;font-weight:800;color:var(--text);}
+        .preview-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;font-size:.72rem;color:var(--text-muted);font-weight:600;}
+        .preview-pill{display:inline-flex;align-items:center;gap:4px;background:#f8fafc;border:1px solid var(--border);border-radius:20px;padding:3px 9px;}
+
+        /* ── Section Cards ── */
+        .section-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px;box-shadow:0 8px 24px rgba(15,23,42,.045);}
+        .section-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background .12s;}
+        .section-head:hover{background:#f8fafc;}
+        .section-head-left{display:flex;align-items:center;gap:10px;}
+        .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+        .si-blue{background:var(--primary-light);color:var(--primary);}
+        .si-teal{background:#ecfdf5;color:var(--success);}
+        .si-amber{background:#fffbeb;color:var(--warning);}
+        .si-purple{background:var(--purple-light);color:var(--purple);}
+        .section-title{font-size:.95rem;font-weight:800;}
+        .section-sub{font-size:.67rem;color:var(--text-muted);margin-top:1px;}
+        .chevron{color:var(--text-muted);font-size:.82rem;transition:transform .25s;}
+        .chevron.open{transform:rotate(180deg);}
+        .section-body{padding:20px;}
+        .form-subsection-title{display:flex;align-items:center;gap:7px;font-size:.76rem;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px;}
+        .form-subsection-title:not(:first-child){margin-top:20px;padding-top:18px;border-top:1px solid var(--border);}
+
+        /* ── Grid layouts ── */
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+        .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;}
+        .address-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:2px;}
+        .address-summary{display:flex;align-items:flex-start;gap:8px;background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-top:10px;font-size:.74rem;color:var(--text-muted);font-weight:600;line-height:1.5;}
+        .address-summary i{color:var(--primary);flex-shrink:0;margin-top:2px;}
+
+        /* ── Form fields ── */
+        .f-group{display:flex;flex-direction:column;margin-bottom:2px;}
+        .f-label{font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px;margin-bottom:5px;}
+        .f-req{color:var(--danger);}
+        .f-help{font-size:.66rem;color:var(--text-muted);margin-top:3px;}
+
+        .section-body input[type=text],
+        .section-body input[type=email],
+        .section-body input[type=number],
+        .section-body input[type=file],
+        .section-body select,
+        .section-body textarea{
+            width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid #d8e1ee;
+            font-family:inherit;font-size:.84rem;font-weight:500;outline:none;
+            background:white;color:var(--text);transition:border-color .15s,box-shadow .15s,background .15s;
+            box-shadow:0 1px 2px rgba(15,23,42,.03);
+        }
+        .section-body input:focus,.section-body select:focus,.section-body textarea:focus{
+            border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);
+        }
+        .section-body input.is-invalid{border-color:var(--danger);}
+        .section-body input[type=file]{padding:6px 10px;background:var(--bg);cursor:pointer;}
+        .section-body textarea{resize:vertical;min-height:80px;}
+
+        .err-msg{font-size:.69rem;color:var(--danger);font-weight:600;margin-top:3px;display:none;align-items:center;gap:4px;}
+        .err-msg.show{display:flex;}
+
+        /* ── Grading type ── */
+        .grade-type-wrap{display:flex;gap:8px;}
+        .grade-type-label{display:flex;align-items:center;gap:7px;padding:11px 13px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;font-size:.84rem;font-weight:700;flex:1;transition:all .15s;background:white;}
+        .grade-type-label:hover{border-color:var(--primary);}
+        .grade-type-label.selected{border-color:var(--primary);background:var(--primary-light);}
+        .grade-type-label input[type=radio]{accent-color:var(--primary);flex-shrink:0;}
+
+        /* ── Learning level ── */
+        .level-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+        .level-label{display:flex;flex-direction:column;align-items:center;gap:5px;padding:16px 8px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-size:.82rem;font-weight:800;text-align:center;transition:all .15s;background:white;}
+        .level-label:hover{border-color:var(--primary);background:var(--primary-light);}
+        .level-label.selected{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
+        .level-label.selected-developing{border-color:#3b82f6;background:#dbeafe;color:#1d4ed8;}
+        .level-label.selected-independent{border-color:var(--success);background:#ecfdf5;color:var(--success);}
+        .level-label input[type=radio]{display:none;}
+        .level-icon{font-size:1.3rem;}
+
+        /* ── SPED section ── */
+        .sped-section{display:none;}
+        .sped-section.show{display:block;}
+
+        /* ── Progress sliders ── */
+        .prog-field{margin-bottom:12px;}
+        .prog-field:last-child{margin-bottom:0;}
+        .prog-field-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+        .prog-field-label{font-size:.77rem;font-weight:700;color:var(--text);}
+        .prog-field-val{font-size:.73rem;font-weight:800;color:var(--text-muted);min-width:34px;text-align:right;}
+        input[type=range]{width:100%;accent-color:var(--primary);height:5px;cursor:pointer;}
+
+        /* ── Photo block ── */
+        .photo-block{display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:10px;padding:16px;border:1.5px solid var(--border);}
+        .photo-current{width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--border);flex-shrink:0;}
+        .photo-placeholder{width:64px;height:64px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;flex-shrink:0;}
+        .photo-preview-new{width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--success);flex-shrink:0;display:none;}
+        .photo-preview-new.show{display:block;}
+
+        /* ── Dropzone ── */
+        .dropzone{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:#f8fafc;position:relative;}
+        .dropzone:hover,.dropzone.dragover{border-color:var(--primary);background:var(--primary-light);}
+        .dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;padding:0;border:none;background:none;}
+        .dropzone-icon{font-size:1.6rem;color:var(--text-muted);margin-bottom:4px;}
+        .dropzone-label{font-size:.81rem;font-weight:700;color:var(--text-muted);}
+        .dropzone-sub{font-size:.68rem;color:var(--text-muted);margin-top:2px;}
+
+        .file-preview-card{display:none;align-items:center;gap:10px;background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:9px;padding:10px 12px;margin-top:8px;}
+        .file-preview-card.show{display:flex;}
+        .file-preview-thumb{width:42px;height:42px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+        .file-preview-icon{width:42px;height:42px;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;border:1px solid #a7f3d0;}
+        .file-preview-name{font-size:.78rem;font-weight:700;color:#065f46;}
+        .file-preview-size{font-size:.66rem;color:#064e3b;margin-top:1px;}
+        .file-preview-remove{margin-left:auto;background:none;border:none;cursor:pointer;color:#065f46;display:flex;align-items:center;gap:3px;font-weight:700;font-family:inherit;font-size:.73rem;}
+        .file-preview-remove:hover{color:var(--danger);}
+
+        .existing-file{display:flex;align-items:center;gap:9px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 12px;margin-bottom:9px;}
+        .existing-file-label{font-size:.77rem;font-weight:700;color:var(--primary);flex:1;}
+        .existing-file-sub{font-size:.63rem;color:var(--text-muted);}
+        .privacy-note{display:flex;align-items:flex-start;gap:7px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-top:10px;font-size:.69rem;color:var(--text-muted);font-weight:600;}
+        .info-note{display:flex;align-items:flex-start;gap:7px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.12);border-radius:8px;padding:8px 11px;margin-top:9px;font-size:.7rem;color:#5b21b6;font-weight:600;line-height:1.45;}
+        .field-feedback{font-size:.66rem;font-weight:700;margin-top:4px;color:var(--text-muted);}
+        .field-feedback.ok{color:#047857;}
+        .field-feedback.warn{color:#b45309;}
+
+        /* ── Alerts ── */
+        .alert-success-custom{display:flex;align-items:center;gap:8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:9px;padding:11px 14px;font-size:.83rem;font-weight:700;color:#065f46;margin-bottom:14px;}
+        .alert-danger-custom{display:flex;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:11px 14px;font-size:.83rem;font-weight:700;color:#991b1b;margin-bottom:14px;}
+
+        /* ── Sticky save bar ── */
+        .sticky-bar{position:fixed;bottom:0;left:var(--sidebar-w);right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:12px 26px;display:flex;align-items:center;justify-content:flex-end;gap:12px;z-index:50;box-shadow:0 -8px 24px rgba(15,23,42,.08);}
+        .btn-cancel-bar{padding:8px 18px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+        .btn-cancel-bar:hover{background:#fef2f2;border-color:var(--danger);color:var(--danger);}
+        .btn-save-bar{padding:10px 26px;border-radius:9px;border:none;background:var(--primary);color:white;font-family:inherit;font-weight:800;font-size:.86rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;box-shadow:0 8px 18px rgba(37,99,235,.22);}
+        .btn-save-bar:hover{background:var(--primary-dark);transform:translateY(-1px);}
+        .btn-save-bar:disabled{background:#94a3b8;cursor:not-allowed;}
+        .spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+        .spinner.show{display:block;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+
+        /* ── Discard modal ── */
+        .modal-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+        .modal-overlay.show{display:flex;}
+        .modal-box{background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:modalIn .2s ease;}
+        .file-modal-box{background:white;border-radius:14px;width:min(980px,92vw);height:min(720px,86vh);box-shadow:0 20px 60px rgba(0,0,0,.24);animation:modalIn .2s ease;display:flex;flex-direction:column;overflow:hidden;}
+        .file-modal-head{height:54px;padding:0 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+        .file-modal-title{font-size:.9rem;font-weight:800;color:var(--text);}
+        .file-modal-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+        .file-modal-close{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+        .file-modal-close:hover{background:#fef2f2;border-color:#fecaca;color:var(--danger);}
+        .file-modal-body{flex:1;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:0;}
+        .file-modal-frame{display:none;width:100%;height:100%;border:0;background:#f8fafc;flex:1;}
+        .file-modal-image{display:none;max-width:100%;max-height:100%;object-fit:contain;}
+        .file-modal-fallback{display:none;text-align:center;color:var(--text-muted);font-size:.84rem;font-weight:700;padding:24px;}
+        .file-modal-fallback i{display:block;font-size:2rem;color:var(--primary);margin-bottom:10px;}
+        @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+        .modal-icon{width:48px;height:48px;border-radius:50%;background:#fffbeb;color:var(--warning);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto 12px;}
+        .modal-title{font-size:.95rem;font-weight:800;text-align:center;margin-bottom:5px;}
+        .modal-msg{font-size:.8rem;color:var(--text-muted);text-align:center;margin-bottom:20px;line-height:1.6;}
+        .modal-actions{display:flex;gap:10px;}
+        .modal-stay{flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);}
+        .modal-discard{flex:1;padding:9px;border-radius:8px;border:none;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}
+            .main{margin-left:0}
+            .sticky-bar{left:0}
+            .grid-2,.grid-3,.grid-4,.grade-type-wrap,.level-wrap,.address-grid{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Learning Management System</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="{% url 'dashboard' %}" class="nav-item"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">Management</div>
+        <a href="{% url 'student_list' %}" class="nav-item active"><i class="bi bi-people-fill"></i> Students</a>
+        <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'teacher_feedback' %}?student={{ student.id }}" class="nav-item"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
+        <div class="nav-label">Tasks</div>
+        <a href="{% url 'assign_task' %}" class="nav-item"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
+        <a href="{% url 'task_history' %}" class="nav-item"><i class="bi bi-journal-text"></i> Task History &amp; Evaluation</a>
+        <div class="nav-label">Monitoring</div>
+        <a href="{% url 'student_monitoring' %}" class="nav-item"><i class="bi bi-activity"></i> Activity Monitor</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">{{ user.username|first|upper }}</div>
+            <div><div class="user-name">{{ user.username }}</div><div class="user-role">Teacher</div></div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn">
+            <i class="bi bi-box-arrow-left"></i> Sign Out
+        </a>
+    </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+    <div class="topbar">
+        <a href="{% url 'student_list' %}" class="topbar-back" id="backBtn">
+            <i class="bi bi-arrow-left"></i> Back to Students
+        </a>
+        <div>
+            <div class="topbar-title">Edit Student</div>
+            <div class="topbar-subtitle">Update learner profile, assessment settings, and documents</div>
+        </div>
+        <div class="topbar-chip">
+            <i class="bi bi-person-circle"></i> {{ student.name }}
+        </div>
+    </div>
+
+    <div class="page-content">
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'error' in message.tags %}
+                <div class="alert-danger-custom"><i class="bi bi-exclamation-circle-fill"></i> {{ message }}</div>
+                {% else %}
+                <div class="alert-success-custom"><i class="bi bi-check-circle-fill"></i> {{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <div class="student-preview">
+            {% if student.profile_picture %}
+                <img src="{{ student.profile_picture.url }}" class="preview-avatar" alt="{{ student.name }}">
+            {% else %}
+                <div class="preview-avatar-fallback">{{ student.name|first|upper }}</div>
+            {% endif %}
+            <div>
+                <div class="preview-name">{{ student.name }}</div>
+                <div class="preview-meta">
+                    <span class="preview-pill"><i class="bi bi-person-badge"></i> {{ student.user.username|default:"No username" }}</span>
+                    <span class="preview-pill"><i class="bi bi-hash"></i> LRN: {{ student.lrn|default:"Not set" }}</span>
+                    <span class="preview-pill"><i class="bi bi-clipboard-check"></i> {{ student.get_grading_type_display }}</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="editForm" novalidate>
+            {% csrf_token %}
+
+            <!-- ═══ SECTION 1: Student Information ═══ -->
+            <div class="section-card">
+                <div class="section-head" onclick="toggleSection('s1','ch1')">
+                    <div class="section-head-left">
+                        <div class="section-icon si-blue"><i class="bi bi-person-fill"></i></div>
+                        <div>
+                            <div class="section-title">Basic Information</div>
+                            <div class="section-sub">Identity details and assessment settings</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-down chevron open" id="ch1"></i>
+                </div>
+                <div class="section-body" id="s1">
+                    <div class="form-subsection-title"><i class="bi bi-person-lines-fill"></i> Student Details</div>
+                    <div class="grid-2" style="margin-bottom:14px;">
+                        <div class="f-group">
+                            <label class="f-label"><i class="bi bi-person"></i> Full Name <span class="f-req">*</span></label>
+                            {{ form.name }}
+                            <div class="err-msg" id="err-name"><i class="bi bi-exclamation-circle"></i> Full name is required.</div>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label"><i class="bi bi-123"></i> LRN <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                            {{ form.lrn }}
+                            <div class="err-msg" id="err-lrn"><i class="bi bi-exclamation-circle"></i> LRN must be 12 digits, numbers only.</div>
+                            <div class="f-help">Learner Reference Number — 12 digits, numbers only.</div>
+                            <div class="field-feedback" id="lrn-feedback">Enter exactly 12 digits.</div>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="f-group">
+                            <label class="f-label"><i class="bi bi-calendar3"></i> Age <span class="f-req">*</span></label>
+                            {{ form.age }}
+                            <div class="err-msg" id="err-age"><i class="bi bi-exclamation-circle"></i> Enter a valid age (3–25).</div>
+                        </div>
+                        <div class="f-group">
+                            <div class="form-subsection-title" style="margin-top:0;padding-top:0;border-top:0;"><i class="bi bi-sliders2"></i> Assessment Settings</div>
+                            <label class="f-label"><i class="bi bi-patch-check"></i> Assessment Type <span class="f-req">*</span></label>
+                            <div class="grade-type-wrap">
+                                <label class="grade-type-label {% if student.grading_type == 'graded' %}selected{% endif %}" id="lbl-graded">
+                                    <input type="radio" name="grading_type" value="graded"
+                                        {% if student.grading_type == 'graded' %}checked{% endif %}
+                                        onchange="updateAssessmentType()">
+                                    📊 Graded
+                                </label>
+                                <label class="grade-type-label {% if student.grading_type != 'graded' %}selected{% endif %}" id="lbl-ungraded">
+                                    <input type="radio" name="grading_type" value="ungraded"
+                                        {% if student.grading_type != 'graded' %}checked{% endif %}
+                                        onchange="updateAssessmentType()">
+                                    🌟 Progress-Based
+                                </label>
+                            </div>
+                            <div class="info-note" id="assessment-note">
+                                <i class="bi bi-info-circle-fill" style="flex-shrink:0;margin-top:1px;"></i>
+                                Progress-Based: No numeric grades. Tracked by skills and task completion.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ SECTION 2: Learning Level ═══ -->
+            <div class="section-card">
+                <div class="section-head" onclick="toggleSection('s2','ch2')">
+                    <div class="section-head-left">
+                        <div class="section-icon si-amber"><i class="bi bi-mortarboard-fill"></i></div>
+                        <div>
+                            <div class="section-title">Learning Level</div>
+                            <div class="section-sub">Replaces grade level for SPED learners</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-down chevron open" id="ch2"></i>
+                </div>
+                <div class="section-body" id="s2">
+                    <label class="f-label" style="margin-bottom:9px;"><i class="bi bi-bar-chart-steps"></i> Learning Level</label>
+                    <div class="level-wrap">
+                        <label class="level-label {% if student.learning_level == 'beginner' %}selected{% endif %}" id="lvl-beginner">
+                            <input type="radio" name="learning_level" value="beginner"
+                                {% if student.learning_level == 'beginner' %}checked{% endif %}
+                                onchange="updateLevelStyle()">
+                            <div class="level-icon">🌱</div>
+                            <div>Beginner</div>
+                            <div style="font-size:.63rem;font-weight:500;color:var(--text-muted);margin-top:1px;">Starting out</div>
+                        </label>
+                        <label class="level-label {% if student.learning_level == 'developing' %}selected-developing{% endif %}" id="lvl-developing">
+                            <input type="radio" name="learning_level" value="developing"
+                                {% if student.learning_level == 'developing' %}checked{% endif %}
+                                onchange="updateLevelStyle()">
+                            <div class="level-icon">📈</div>
+                            <div>Developing</div>
+                            <div style="font-size:.63rem;font-weight:500;color:var(--text-muted);margin-top:1px;">Making progress</div>
+                        </label>
+                        <label class="level-label {% if student.learning_level == 'independent' %}selected-independent{% endif %}" id="lvl-independent">
+                            <input type="radio" name="learning_level" value="independent"
+                                {% if student.learning_level == 'independent' %}checked{% endif %}
+                                onchange="updateLevelStyle()">
+                            <div class="level-icon">⭐</div>
+                            <div>Independent</div>
+                            <div style="font-size:.63rem;font-weight:500;color:var(--text-muted);margin-top:1px;">Works on own</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ SECTION 3: Learning Profile (Progress-Based only) ═══ -->
+            <div class="section-card sped-section" id="spedSection">
+                <div class="section-head" onclick="toggleSection('s3','ch3')">
+                    <div class="section-head-left">
+                        <div class="section-icon si-purple"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div>
+                            <div class="section-title">Learning Profile</div>
+                            <div class="section-sub">Goals, skills focus, progress status and tracking</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-down chevron open" id="ch3"></i>
+                </div>
+                <div class="section-body" id="s3">
+                    <div class="grid-3" style="margin-bottom:14px;">
+                        <div class="f-group">
+                            <label class="f-label"><i class="bi bi-flag-fill"></i> Progress Status</label>
+                            {{ form.progress_status }}
+                        </div>
+                        <div class="f-group" style="grid-column:span 2;">
+                            <label class="f-label"><i class="bi bi-tags-fill"></i> Skills Focus</label>
+                            {{ form.skills_focus }}
+                            <div class="f-help">Comma-separated e.g. Communication, Motor Skills</div>
+                        </div>
+                    </div>
+                    <div class="f-group" style="margin-bottom:18px;">
+                        <label class="f-label"><i class="bi bi-bullseye"></i> Learning Goals</label>
+                        {{ form.learning_goals }}
+                    </div>
+
+                    <div style="font-size:.76rem;font-weight:800;color:var(--text);margin-bottom:12px;padding-top:4px;border-top:1px solid var(--border);">
+                        <i class="bi bi-bar-chart-fill" style="color:var(--purple);margin-right:5px;"></i> Skills Progress (0–100%)
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <div class="prog-field">
+                                <div class="prog-field-row">
+                                    <div class="prog-field-label">💬 Communication</div>
+                                    <div class="prog-field-val" id="val-comm">{{ student.progress_communication }}%</div>
+                                </div>
+                                <input type="range" name="progress_communication" min="0" max="100"
+                                    value="{{ student.progress_communication }}"
+                                    oninput="document.getElementById('val-comm').textContent=this.value+'%'">
+                            </div>
+                            <div class="prog-field">
+                                <div class="prog-field-row">
+                                    <div class="prog-field-label">🤸 Motor Skills</div>
+                                    <div class="prog-field-val" id="val-motor">{{ student.progress_motor }}%</div>
+                                </div>
+                                <input type="range" name="progress_motor" min="0" max="100"
+                                    value="{{ student.progress_motor }}"
+                                    oninput="document.getElementById('val-motor').textContent=this.value+'%'">
+                            </div>
+                            <div class="prog-field">
+                                <div class="prog-field-row">
+                                    <div class="prog-field-label">👥 Social Skills</div>
+                                    <div class="prog-field-val" id="val-social">{{ student.progress_social }}%</div>
+                                </div>
+                                <input type="range" name="progress_social" min="0" max="100"
+                                    value="{{ student.progress_social }}"
+                                    oninput="document.getElementById('val-social').textContent=this.value+'%'">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="prog-field">
+                                <div class="prog-field-row">
+                                    <div class="prog-field-label">🧴 Self-Care</div>
+                                    <div class="prog-field-val" id="val-self">{{ student.progress_selfcare }}%</div>
+                                </div>
+                                <input type="range" name="progress_selfcare" min="0" max="100"
+                                    value="{{ student.progress_selfcare }}"
+                                    oninput="document.getElementById('val-self').textContent=this.value+'%'">
+                            </div>
+                            <div class="prog-field">
+                                <div class="prog-field-row">
+                                    <div class="prog-field-label">📚 Academic Readiness</div>
+                                    <div class="prog-field-val" id="val-acad">{{ student.progress_academic }}%</div>
+                                </div>
+                                <input type="range" name="progress_academic" min="0" max="100"
+                                    value="{{ student.progress_academic }}"
+                                    oninput="document.getElementById('val-acad').textContent=this.value+'%'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ SECTION 4: Contact Information ═══ -->
+            <div class="section-card">
+                <div class="section-head" onclick="toggleSection('s4','ch4')">
+                    <div class="section-head-left">
+                        <div class="section-icon si-teal"><i class="bi bi-envelope-fill"></i></div>
+                        <div>
+                            <div class="section-title">Contact Information</div>
+                            <div class="section-sub">Email, phone number, and home address</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-down chevron open" id="ch4"></i>
+                </div>
+                <div class="section-body" id="s4">
+                    <div class="grid-2" style="margin-bottom:14px;">
+                        <div class="f-group">
+                            <label class="f-label"><i class="bi bi-envelope"></i> Email Address</label>
+                            {{ form.email }}
+                            <div class="err-msg" id="err-email"><i class="bi bi-exclamation-circle"></i> Enter a valid email address.</div>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label"><i class="bi bi-telephone"></i> Phone Number</label>
+                            {{ form.phone_number }}
+                            <div class="f-help">Format: 09XX-XXX-XXXX</div>
+                        </div>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label"><i class="bi bi-geo-alt"></i> Home Address</label>
+                        <input type="hidden" name="address" id="edit-address" value="{{ student.address|default:''|escape }}">
+                        <div class="address-grid">
+                            <div>
+                                <select id="edit-address-region">
+                                    <option value="">Region</option>
+                                </select>
+                                <div class="f-help">Start with your region</div>
+                            </div>
+                            <div>
+                                <select id="edit-address-province">
+                                    <option value="">Province</option>
+                                </select>
+                                <div class="f-help">Filtered by region</div>
+                            </div>
+                            <div>
+                                <select id="edit-address-city">
+                                    <option value="">City / Municipality</option>
+                                </select>
+                                <div class="f-help">Filtered by province</div>
+                            </div>
+                            <div>
+                                <select id="edit-address-barangay">
+                                    <option value="">Barangay</option>
+                                </select>
+                                <div class="f-help">Filtered by city or municipality</div>
+                            </div>
+                            <div>
+                                <input type="text" id="edit-address-line" placeholder="House No., Purok, Street">
+                                <div class="f-help">Example: Purok 3</div>
+                            </div>
+                            <div>
+                                <input type="text" id="edit-address-postal" placeholder="ZIP Code" maxlength="4" inputmode="numeric">
+                                <div class="f-help">Auto-filled when available</div>
+                            </div>
+                        </div>
+                        <div class="address-summary">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span id="edit-address-preview">Select a Philippine address above.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ SECTION 5: Documents & Photo ═══ -->
+            <div class="section-card">
+                <div class="section-head" onclick="toggleSection('s5','ch5')">
+                    <div class="section-head-left">
+                        <div class="section-icon si-purple"><i class="bi bi-file-earmark-fill"></i></div>
+                        <div>
+                            <div class="section-title">Documents &amp; Photo</div>
+                            <div class="section-sub">Profile picture and birth certificate</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-down chevron open" id="ch5"></i>
+                </div>
+                <div class="section-body" id="s5">
+                    <div class="grid-2">
+                        <!-- Profile Picture -->
+                        <div>
+                            <label class="f-label" style="margin-bottom:9px;"><i class="bi bi-camera-fill"></i> Profile Picture</label>
+                            <div class="photo-block">
+                                {% if student.profile_picture %}
+                                    <img src="{{ student.profile_picture.url }}" class="photo-current" id="currentPhoto" alt="Current photo">
+                                {% else %}
+                                    <div class="photo-placeholder" id="currentPhoto">{{ student.name|first }}</div>
+                                {% endif %}
+                                <img id="newPhotoPreview" class="photo-preview-new" alt="New photo preview">
+                                <div>
+                                    <div style="font-size:.77rem;font-weight:700;margin-bottom:7px;">
+                                        {% if student.profile_picture %}Replace photo{% else %}Upload photo{% endif %}
+                                    </div>
+                                    <input type="file" name="profile_picture" id="photoInput"
+                                           accept="image/jpeg,image/png,image/gif"
+                                           style="font-size:.74rem;" onchange="previewPhoto(this)">
+                                    <div class="f-help">JPG or PNG · Max 5 MB</div>
+                                    <div class="err-msg" id="err-photo" style="margin-top:3px;">
+                                        <i class="bi bi-exclamation-circle"></i> File too large or wrong type.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Birth Certificate -->
+                        <div>
+                            <label class="f-label" style="margin-bottom:9px;"><i class="bi bi-file-earmark-text-fill"></i> Birth Certificate</label>
+                            {% if student.birth_certificate %}
+                            <div class="existing-file">
+                                <i class="bi bi-file-earmark-check-fill" style="color:var(--primary);font-size:1.1rem;flex-shrink:0;"></i>
+                                <div style="flex:1;">
+                                    <div class="existing-file-label">Existing file uploaded</div>
+                                    <div class="existing-file-sub">Click below to replace</div>
+                                </div>
+                                <button type="button" onclick="openBirthCertModal('{{ student.birth_certificate.url }}')"
+                                   style="font-family:inherit;font-size:.74rem;font-weight:700;color:var(--primary);text-decoration:none;background:none;border:none;padding:0;cursor:pointer;">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                                <a href="{{ student.birth_certificate.url }}" download
+                                   style="font-size:.74rem;font-weight:700;color:#065f46;text-decoration:none;margin-left:8px;">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </div>
+                            {% endif %}
+                            <div class="dropzone" id="certDropzone"
+                                 ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                <input type="file" name="birth_certificate" id="certInput"
+                                       accept="application/pdf,image/jpeg,image/png"
+                                       onchange="handleCertUpload(this.files[0])">
+                                <div id="dropzoneContent">
+                                    <div class="dropzone-icon"><i class="bi bi-cloud-upload"></i></div>
+                                    <div class="dropzone-label">Drag &amp; drop or click to upload</div>
+                                    <div class="dropzone-sub">PDF, JPG, or PNG · Max 5 MB</div>
+                                </div>
+                            </div>
+                            <div class="file-preview-card" id="certPreviewCard">
+                                <div id="certPreviewIcon"></div>
+                                <div>
+                                    <div class="file-preview-name" id="certFileName">—</div>
+                                    <div class="file-preview-size" id="certFileSize">—</div>
+                                </div>
+                                <button type="button" class="file-preview-remove" onclick="removeCert()">
+                                    <i class="bi bi-x-circle"></i> Remove
+                                </button>
+                            </div>
+                            <div class="err-msg" id="err-cert" style="margin-top:5px;">
+                                <i class="bi bi-exclamation-circle"></i> File too large (max 5 MB) or wrong type.
+                            </div>
+                            <div class="privacy-note">
+                                <i class="bi bi-shield-lock-fill" style="color:var(--primary);flex-shrink:0;margin-top:1px;"></i>
+                                Securely stored. Only accessible to authorized personnel.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+<div class="modal-overlay" id="birthCertModal">
+    <div class="file-modal-box">
+        <div class="file-modal-head">
+            <i class="bi bi-file-earmark-text-fill" style="color:var(--primary);"></i>
+            <div class="file-modal-title">Birth Certificate Preview</div>
+            <div class="file-modal-actions">
+                {% if student.birth_certificate %}
+                <a href="{{ student.birth_certificate.url }}" download
+                   style="display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;color:#065f46;text-decoration:none;padding:7px 10px;border-radius:8px;border:1.5px solid #a7f3d0;background:#ecfdf5;">
+                    <i class="bi bi-download"></i> Download
+                </a>
+                {% endif %}
+                <button type="button" class="file-modal-close" onclick="closeBirthCertModal()" aria-label="Close preview">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="file-modal-body">
+            <img id="birthCertImage" class="file-modal-image" alt="Birth certificate preview">
+            <iframe id="birthCertFrame" class="file-modal-frame" title="Birth certificate preview"></iframe>
+            <div id="birthCertFallback" class="file-modal-fallback">
+                <i class="bi bi-file-earmark-arrow-down"></i>
+                This file cannot be previewed in the browser. Please use Download.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Sticky save bar ── -->
+<div class="sticky-bar">
+    <button type="button" class="btn-cancel-bar" onclick="confirmDiscard()">
+        <i class="bi bi-x-lg"></i> Cancel
+    </button>
+    <button type="button" class="btn-save-bar" id="saveBtn" onclick="submitForm()">
+        <div class="spinner" id="saveSpinner"></div>
+        <i class="bi bi-floppy-fill" id="saveIcon"></i>
+        <span id="saveTxt">Save Changes</span>
+    </button>
+</div>
+
+<!-- ── Discard modal ── -->
+<div class="modal-overlay" id="discardModal">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="modal-title">Discard Changes?</div>
+        <div class="modal-msg">You have unsaved changes. If you leave now, all edits will be lost.</div>
+        <div class="modal-actions">
+            <button class="modal-stay" onclick="closeDiscardModal()">Keep Editing</button>
+            <a href="{% url 'student_list' %}" class="modal-discard">Yes, Discard</a>
+        </div>
+    </div>
+</div>
+
+<!-- ── Sign Out modal ── -->
+<!-- Save confirmation modal -->
+<div class="modal-overlay" id="saveConfirmModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:var(--primary-light);color:var(--primary);"><i class="bi bi-check2-circle"></i></div>
+        <div class="modal-title">Save Student Updates?</div>
+        <div class="modal-msg">Review the details before saving. This will update {{ student.name }}'s profile.</div>
+        <div class="modal-actions">
+            <button class="modal-stay" onclick="closeSaveConfirm()">Review Again</button>
+            <button type="button" class="modal-discard" style="background:var(--primary);" onclick="performSave()">Yes, Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:14px;padding:28px;max-width:340px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.3rem;">🚪</div>
+        <h5 style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:800;color:#0f172a;margin:0 0 7px;">Sign Out?</h5>
+        <p style="font-size:.81rem;color:#64748b;margin:0 0 22px;">Are you sure you want to sign out of Inclusive Classroom?</p>
+        <div style="display:flex;gap:10px;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:9px;border:1px solid #e2e8f0;border-radius:8px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.81rem;font-weight:700;color:#64748b;cursor:pointer;">
+                Cancel
+            </button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:9px;border:none;border-radius:8px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.81rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                Yes, Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'classroom/js/ph_address.js' %}"></script>
+<script>
+function toggleSection(bodyId, chevId) {
+    const body = document.getElementById(bodyId);
+    const chev = document.getElementById(chevId);
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    chev.classList.toggle('open', !open);
+}
+
+function updateAssessmentType() {
+    const ungraded = document.querySelector('input[name="grading_type"][value="ungraded"]')?.checked;
+    document.getElementById('assessment-note').style.display = ungraded ? 'flex' : 'none';
+    document.getElementById('spedSection').classList.toggle('show', ungraded);
+    document.querySelectorAll('.grade-type-label').forEach(l => l.classList.remove('selected'));
+    document.querySelector('input[name="grading_type"]:checked')?.closest('.grade-type-label')?.classList.add('selected');
+}
+
+function updateLevelStyle() {
+    const map = { beginner:'selected', developing:'selected-developing', independent:'selected-independent' };
+    Object.keys(map).forEach(lvl => {
+        const el = document.getElementById('lvl-' + lvl);
+        el.className = 'level-label';
+        if (document.querySelector(`input[name="learning_level"][value="${lvl}"]`)?.checked) el.classList.add(map[lvl]);
+    });
+}
+
+function submitForm() {
+    if (!validateAll()) return;
+    document.getElementById('saveConfirmModal').classList.add('show');
+}
+
+function closeSaveConfirm() {
+    document.getElementById('saveConfirmModal').classList.remove('show');
+}
+
+function performSave() {
+    closeSaveConfirm();
+    syncPhilippineAddress('edit');
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    document.getElementById('saveSpinner').classList.add('show');
+    document.getElementById('saveIcon').style.display = 'none';
+    document.getElementById('saveTxt').textContent = 'Saving…';
+    document.getElementById('editForm').submit();
+}
+
+function validateAll() {
+    let ok = true;
+    const name = document.querySelector('[name="name"]');
+    if (name && !name.value.trim()) { showErr('err-name'); name.classList.add('is-invalid'); ok = false; }
+    const age = document.querySelector('[name="age"]');
+    if (age) { const v = parseInt(age.value); if (!v || v < 3 || v > 25) { showErr('err-age'); age.classList.add('is-invalid'); ok = false; } }
+    const lrn = document.querySelector('[name="lrn"]');
+    if (lrn && lrn.value && !/^\d{12}$/.test(lrn.value)) { showErr('err-lrn'); lrn.classList.add('is-invalid'); ok = false; }
+    const email = document.querySelector('[name="email"]');
+    if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) { showErr('err-email'); email.classList.add('is-invalid'); ok = false; }
+    if (!ok) document.querySelector('.err-msg.show')?.closest('.section-card')?.scrollIntoView({behavior:'smooth',block:'start'});
+    return ok;
+}
+function showErr(id) { document.getElementById(id)?.classList.add('show'); }
+function clearErr(id, input) { document.getElementById(id)?.classList.remove('show'); input?.classList.remove('is-invalid'); }
+
+function updateLrnFeedback() {
+    const lrn = document.querySelector('[name="lrn"]');
+    const feedback = document.getElementById('lrn-feedback');
+    if (!lrn || !feedback) return;
+    const value = lrn.value.trim();
+    feedback.className = 'field-feedback';
+    if (!value) {
+        feedback.textContent = 'Optional, but must be exactly 12 digits if provided.';
+    } else if (/^\d{12}$/.test(value)) {
+        feedback.textContent = 'LRN format looks good.';
+        feedback.classList.add('ok');
+    } else {
+        feedback.textContent = `${value.length}/12 digits entered. Numbers only.`;
+        feedback.classList.add('warn');
+    }
+}
+
+function previewPhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5*1024*1024 || !file.type.startsWith('image/')) {
+        document.getElementById('err-photo').classList.add('show'); input.value = ''; return;
+    }
+    document.getElementById('err-photo').classList.remove('show');
+    const r = new FileReader();
+    r.onload = e => { const p = document.getElementById('newPhotoPreview'); p.src = e.target.result; p.classList.add('show'); };
+    r.readAsDataURL(file);
+}
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('certDropzone').classList.add('dragover'); }
+function handleDragLeave(e) { document.getElementById('certDropzone').classList.remove('dragover'); }
+function handleDrop(e) {
+    e.preventDefault(); document.getElementById('certDropzone').classList.remove('dragover');
+    const file = e.dataTransfer.files[0]; if (!file) return;
+    const dt = new DataTransfer(); dt.items.add(file);
+    document.getElementById('certInput').files = dt.files;
+    handleCertUpload(file);
+}
+function handleCertUpload(file) {
+    const allowed = ['application/pdf','image/jpeg','image/png'];
+    if (!file || !allowed.includes(file.type) || file.size > 5*1024*1024) {
+        document.getElementById('err-cert').classList.add('show');
+        document.getElementById('certPreviewCard').classList.remove('show'); return;
+    }
+    document.getElementById('err-cert').classList.remove('show');
+    document.getElementById('certFileName').textContent = file.name;
+    document.getElementById('certFileSize').textContent = (file.size/1024).toFixed(1) + ' KB';
+    const iconEl = document.getElementById('certPreviewIcon');
+    if (file.type.startsWith('image/')) {
+        const r = new FileReader(); r.onload = e => { iconEl.innerHTML = `<img src="${e.target.result}" class="file-preview-thumb">`; }; r.readAsDataURL(file);
+    } else { iconEl.innerHTML = `<div class="file-preview-icon">📄</div>`; }
+    document.getElementById('certPreviewCard').classList.add('show');
+}
+function removeCert() {
+    document.getElementById('certInput').value = '';
+    document.getElementById('certPreviewCard').classList.remove('show');
+    document.getElementById('err-cert').classList.remove('show');
+}
+
+window._hasChanges = false;
+function confirmDiscard() {
+    if (window._hasChanges) document.getElementById('discardModal').classList.add('show');
+    else window.location.href = "{% url 'student_list' %}";
+}
+function closeDiscardModal() { document.getElementById('discardModal').classList.remove('show'); }
+document.getElementById('discardModal').addEventListener('click', function(e) { if (e.target===this) closeDiscardModal(); });
+document.getElementById('saveConfirmModal').addEventListener('click', function(e) { if (e.target===this) closeSaveConfirm(); });
+function openBirthCertModal(url) {
+    const cleanUrl = String(url || '').split('?')[0].toLowerCase();
+    const frame = document.getElementById('birthCertFrame');
+    const image = document.getElementById('birthCertImage');
+    const fallback = document.getElementById('birthCertFallback');
+
+    frame.style.display = 'none';
+    image.style.display = 'none';
+    fallback.style.display = 'none';
+    frame.src = '';
+    image.src = '';
+
+    if (/\.(png|jpe?g|gif|webp)$/i.test(cleanUrl)) {
+        image.src = url;
+        image.style.display = 'block';
+    } else if (/\.pdf$/i.test(cleanUrl)) {
+        frame.src = url;
+        frame.style.display = 'block';
+    } else {
+        fallback.style.display = 'block';
+    }
+    document.getElementById('birthCertModal').classList.add('show');
+}
+function closeBirthCertModal() {
+    document.getElementById('birthCertModal').classList.remove('show');
+    document.getElementById('birthCertFrame').src = '';
+    document.getElementById('birthCertImage').src = '';
+}
+document.getElementById('birthCertModal').addEventListener('click', function(e) { if (e.target===this) closeBirthCertModal(); });
+document.getElementById('backBtn').addEventListener('click', function(e) { if (window._hasChanges) { e.preventDefault(); confirmDiscard(); } });
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateAssessmentType();
+    updateLevelStyle();
+    setupPhilippineAddress('edit', {loadExisting: true});
+    const map = {'[name="name"]':'err-name','[name="age"]':'err-age','[name="lrn"]':'err-lrn','[name="email"]':'err-email'};
+    Object.entries(map).forEach(([sel, errId]) => {
+        const el = document.querySelector(sel);
+        if (el) el.addEventListener('input', () => clearErr(errId, el));
+    });
+    const lrnEl = document.querySelector('[name="lrn"]');
+    if (lrnEl) lrnEl.addEventListener('input', () => { lrnEl.value = lrnEl.value.replace(/\D/g,'').slice(0,12); updateLrnFeedback(); });
+    updateLrnFeedback();
+    const phone = document.querySelector('[name="phone_number"]');
+    if (phone) phone.addEventListener('input', () => {
+        let d = phone.value.replace(/\D/g,'');
+        if (d.length>4&&d.length<=7) d=d.slice(0,4)+'-'+d.slice(4);
+        else if (d.length>7) d=d.slice(0,4)+'-'+d.slice(4,7)+'-'+d.slice(7,11);
+        phone.value = d;
+    });
+    document.getElementById('editForm').addEventListener('change', () => { window._hasChanges = true; });
+    document.getElementById('editForm').addEventListener('submit', () => syncPhilippineAddress('edit'));
+});
+</script>
+</body>
+</html>

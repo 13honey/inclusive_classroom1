@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Inclusive Classroom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root{
+            --primary:#1e1b4b; --primary-mid:#312e81; --accent:#6366f1; --accent-light:#eef2ff;
+            --success:#10b981; --warning:#f59e0b; --danger:#ef4444;
+            --bg:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --text-muted:#64748b;
+            --sidebar-w:260px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        /* SIDEBAR */
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:var(--primary);display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;}
+        .logo-text .app-name{font-family:'Fraunces',serif;font-size:0.95rem;font-weight:800;color:white;line-height:1.15;}
+        .logo-text .app-sub{font-size:0.58rem;color:#4338ca;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+        .role-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:20px;padding:3px 9px;font-size:0.63rem;font-weight:700;margin-top:8px;text-transform:uppercase;letter-spacing:0.8px;}
+        .sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+        .nav-label{font-size:0.58rem;font-weight:700;color:#4338ca;text-transform:uppercase;letter-spacing:1.5px;padding:14px 10px 5px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:1px;color:#a5b4fc;font-weight:600;font-size:0.82rem;text-decoration:none;transition:all 0.15s;}
+        .nav-item:hover{background:rgba(255,255,255,0.07);color:white;}
+        .nav-item.active{background:var(--accent);color:white;}
+        .nav-item i{font-size:0.9rem;width:17px;text-align:center;}
+        .sidebar-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,0.07);}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:4px;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:white;flex-shrink:0;}
+        .user-name{font-size:0.78rem;font-weight:700;color:white;}
+        .user-role{font-size:0.63rem;color:#6366f1;}
+        .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#6366f1;font-size:0.77rem;font-weight:600;text-decoration:none;transition:all 0.15s;}
+        .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,0.07);}
+
+        /* MAIN */
+        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .topbar{background:white;border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+        .topbar-left{display:flex;align-items:center;gap:10px;}
+        .topbar-title{font-size:1rem;font-weight:800;}
+        .topbar-badge{display:inline-flex;align-items:center;gap:5px;background:var(--accent-light);color:var(--accent);border-radius:20px;padding:4px 11px;font-size:0.72rem;font-weight:700;}
+        .page-content{padding:24px 28px;}
+
+        /* WELCOME BAR */
+        .welcome-bar{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-mid) 60%,#4338ca 100%);border-radius:16px;padding:28px 32px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;}
+        .welcome-bar::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.04);}
+        .welcome-bar::after{content:'';position:absolute;bottom:-80px;right:120px;width:180px;height:180px;border-radius:50%;background:rgba(99,102,241,0.15);}
+        .welcome-text h2{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:800;color:white;margin-bottom:5px;}
+        .welcome-text p{color:#a5b4fc;font-size:0.83rem;font-weight:500;}
+        .welcome-icon{font-size:3.5rem;opacity:0.2;position:relative;z-index:1;}
+
+        /* STATS */
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+        .stat-card{background:white;border-radius:13px;padding:20px;border:1px solid var(--border);transition:all 0.2s;}
+        .stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.09);}
+        .stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:14px;}
+        .si-blue{background:#eff6ff;color:#2563eb;}
+        .si-green{background:#ecfdf5;color:var(--success);}
+        .si-amber{background:#fffbeb;color:var(--warning);}
+        .si-purple{background:var(--accent-light);color:var(--accent);}
+        .stat-value{font-size:2rem;font-weight:800;line-height:1;font-family:'Fraunces',serif;margin-bottom:4px;}
+        .stat-label{font-size:0.75rem;color:var(--text-muted);font-weight:600;}
+
+        /* SUMMARY CARDS ROW */
+        .summary-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+        .summary-card{background:white;border-radius:13px;border:1px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:14px;}
+        .sc-icon{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+        .sc-label{font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+        .sc-value{font-size:1rem;font-weight:800;color:var(--text);margin-top:2px;}
+
+        /* TABLE CARD */
+        .table-card{background:white;border-radius:13px;border:1px solid var(--border);overflow:hidden;}
+        .table-card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .table-card-title{font-size:0.92rem;font-weight:800;}
+        table{width:100%;border-collapse:collapse;}
+        thead th{padding:10px 14px;background:#f8fafc;font-size:0.67rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;border-bottom:1px solid var(--border);}
+        thead th:first-child{padding-left:20px;}
+        thead th:last-child{padding-right:20px;}
+        tbody tr:hover{background:#f8fafc;}
+        tbody tr:not(:last-child) td{border-bottom:1px solid var(--border);}
+        tbody td{padding:13px 14px;font-size:0.83rem;vertical-align:middle;}
+        tbody td:first-child{padding-left:20px;}
+        tbody td:last-child{padding-right:20px;}
+        .roster-teacher{display:flex;align-items:center;gap:10px;font-weight:800;}
+        .mini-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;flex-shrink:0;}
+        .count-pill{display:inline-flex;align-items:center;justify-content:center;min-width:32px;border-radius:20px;background:#f8fafc;border:1px solid var(--border);padding:4px 10px;font-size:0.78rem;font-weight:800;color:var(--text);}
+        .btn-view{background:var(--accent-light);color:var(--accent);}
+        .btn-view:hover{background:var(--accent);color:white;}
+        .student-list{display:grid;gap:8px;margin-top:16px;max-height:330px;overflow-y:auto;}
+        .student-list-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);}
+        .student-list-name{font-size:0.85rem;font-weight:800;color:var(--text);}
+        .student-list-meta{font-size:0.72rem;color:var(--text-muted);font-weight:600;}
+        .student-empty{padding:18px;border:1px dashed var(--border);border-radius:10px;text-align:center;color:var(--text-muted);font-size:0.83rem;font-weight:700;}
+        .recent-grid{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:12px;padding:16px 20px 20px;}
+        .recent-user-card{border:1px solid var(--border);border-radius:11px;padding:14px;background:#fff;display:grid;gap:10px;min-height:132px;transition:all .15s;}
+        .recent-user-card:hover{border-color:#c7d2fe;box-shadow:0 8px 24px rgba(99,102,241,.12);transform:translateY(-2px);}
+        .recent-user-top{display:flex;align-items:center;gap:9px;min-width:0;}
+        .recent-user-name{font-size:.84rem;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .recent-user-email{font-size:.72rem;color:var(--text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .recent-user-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;}
+        .recent-date{font-size:.7rem;color:var(--text-muted);font-weight:700;}
+        .recent-users-card table{border-collapse:separate;border-spacing:0 10px;padding:6px 20px 16px;}
+        .recent-users-card thead th{background:transparent;border-bottom:none;padding-bottom:2px;}
+        .recent-users-card tbody tr{background:#fff;border-radius:11px;box-shadow:0 0 0 1px var(--border);}
+        .recent-users-card tbody tr:hover{background:#fbfdff;box-shadow:0 8px 24px rgba(99,102,241,.12),0 0 0 1px #c7d2fe;}
+        .recent-users-card tbody tr:not(:last-child) td{border-bottom:none;}
+        .recent-users-card tbody td{padding-top:14px;padding-bottom:14px;}
+        .recent-users-card tbody td:first-child{border-top-left-radius:11px;border-bottom-left-radius:11px;}
+        .recent-users-card tbody td:last-child{border-top-right-radius:11px;border-bottom-right-radius:11px;}
+
+        /* ROLE BADGES */
+        .role-badge{display:inline-flex;align-items:center;border-radius:20px;padding:3px 10px;font-size:0.7rem;font-weight:700;}
+        .role-admin{background:#fce7f3;color:#be185d;}
+        .role-teacher{background:#ecfdf5;color:#065f46;}
+        .role-student{background:var(--accent-light);color:var(--accent);}
+
+        /* BUTTONS */
+        .btn-add{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:inherit;font-weight:700;font-size:0.82rem;cursor:pointer;text-decoration:none;transition:background 0.15s;}
+        .btn-add:hover{background:#4f46e5;color:white;}
+        .btn-action{padding:5px 11px;border-radius:7px;font-size:0.73rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all 0.15s;text-decoration:none;display:inline-flex;align-items:center;gap:3px;}
+        .btn-edit{background:#fffbeb;color:#92400e;}
+        .btn-edit:hover{background:var(--warning);color:white;}
+        .btn-delete{background:#fef2f2;color:#b91c1c;}
+        .btn-delete:hover{background:var(--danger);color:white;}
+
+        /* ALERTS */
+        .alert-bar{padding:10px 13px;border-radius:8px;margin-bottom:16px;font-size:0.83rem;font-weight:600;display:flex;align-items:center;gap:7px;}
+        .alert-success{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
+        .alert-danger{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+
+        /* MODAL */
+        .modal-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+        .modal-overlay.show{display:flex;}
+        .modal-box{background:white;border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.2s ease;}
+        .modal-box.wide{max-width:520px;}
+        @keyframes modalIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+        .modal-icon{width:52px;height:52px;border-radius:50%;background:#fef2f2;color:#ef4444;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;}
+        .modal-title{font-size:1rem;font-weight:800;text-align:center;margin-bottom:6px;}
+        .modal-msg{font-size:0.82rem;color:#64748b;text-align:center;margin-bottom:22px;line-height:1.6;}
+        .modal-actions{display:flex;gap:10px;}
+        .modal-cancel{flex:1;padding:10px;border-radius:9px;border:1.5px solid #e2e8f0;background:white;font-family:inherit;font-weight:700;font-size:0.85rem;cursor:pointer;color:#64748b;}
+        .modal-confirm{flex:1;padding:10px;border-radius:9px;border:none;background:#ef4444;color:white;font-family:inherit;font-weight:700;font-size:0.85rem;cursor:pointer;}
+        .modal-cancel:hover{background:#f8fafc;}
+        .modal-confirm:hover{background:#dc2626;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .stat-card:nth-child(1){animation:fadeUp .3s ease .05s both}
+        .stat-card:nth-child(2){animation:fadeUp .3s ease .10s both}
+        .stat-card:nth-child(3){animation:fadeUp .3s ease .15s both}
+        .stat-card:nth-child(4){animation:fadeUp .3s ease .20s both}
+
+        @media(max-width:1100px){.recent-grid{grid-template-columns:repeat(3,minmax(150px,1fr));}}
+        @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.summary-row{grid-template-columns:1fr}.recent-grid{grid-template-columns:repeat(2,minmax(150px,1fr));}}
+        @media(max-width:640px){.sidebar{display:none}.main{margin-left:0}.page-content{padding:16px}.recent-grid{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🏫</div>
+        <div class="logo-text">
+            <div class="app-name">Inclusive Classroom</div>
+            <div class="app-sub">Management System</div>
+            <div class="role-chip"><i class="bi bi-shield-fill"></i> Administrator</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Overview</div>
+        <a href="{% url 'admin_dashboard' %}" class="nav-item active"><i class="bi bi-grid-fill"></i> Dashboard</a>
+        <div class="nav-label">Users</div>
+        <a href="{% url 'admin_user_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> All Users</a>
+        <a href="{% url 'admin_add_user' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add User</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">{{ user.username|first|upper }}</div>
+            <div>
+                <div class="user-name">{{ user.username }}</div>
+                <div class="user-role">System Admin</div>
+            </div>
+        </div>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="topbar-title">Admin Dashboard</div>
+            <span class="topbar-badge"><i class="bi bi-shield-fill"></i> Administrator</span>
+        </div>
+    </div>
+
+    <div class="page-content">
+
+        <!-- WELCOME -->
+        <div class="welcome-bar">
+            <div class="welcome-text">
+                <h2>Welcome back, {{ user.username }}!</h2>
+                <p>Here's a full overview of your Inclusive Classroom system.</p>
+            </div>
+            <div class="welcome-icon">🏫</div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon si-blue"><i class="bi bi-mortarboard-fill"></i></div>
+                <div class="stat-value">{{ total_students }}</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-green"><i class="bi bi-person-workspace"></i></div>
+                <div class="stat-value">{{ total_teachers }}</div>
+                <div class="stat-label">Teachers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-amber"><i class="bi bi-shield-fill"></i></div>
+                <div class="stat-value">{{ total_admins }}</div>
+                <div class="stat-label">Administrators</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-purple"><i class="bi bi-people-fill"></i></div>
+                <div class="stat-value">{{ total_users }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+
+        <!-- TEACHER ROSTERS -->
+        <div class="table-card" style="margin-bottom:20px;">
+            <div class="table-card-header">
+                <div class="table-card-title">Teacher Rosters</div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Teacher</th>
+                            <th>Assigned Students</th>
+                            <th>Students</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teacher_rosters %}
+                        <tr>
+                            <td>
+                                <div class="roster-teacher">
+                                    <div class="mini-avatar">{{ teacher.username|first|upper }}</div>
+                                    <span>{{ teacher.username }}</span>
+                                </div>
+                            </td>
+                            <td><span class="count-pill">{{ teacher.student_total }}</span></td>
+                            <td>
+                                <button type="button" class="btn-action btn-view" onclick="openRosterModal('roster-{{ teacher.id }}', '{{ teacher.username|escapejs }}')">
+                                    <i class="bi bi-eye-fill"></i> View
+                                </button>
+                                <div id="roster-{{ teacher.id }}" style="display:none;">
+                                    {% for student in teacher.assigned_students.all %}
+                                        <div class="student-list-item">
+                                            <div class="mini-avatar">{{ student.name|first|upper }}</div>
+                                            <div>
+                                                <div class="student-list-name">{{ student.name }}</div>
+                                                <div class="student-list-meta">Student</div>
+                                            </div>
+                                        </div>
+                                    {% empty %}
+                                        <div class="student-empty">No students assigned yet.</div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" style="padding:24px;text-align:center;color:var(--text-muted);">No teachers yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ALERTS -->
+        {% if messages %}{% for message in messages %}
+        <div class="alert-bar {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+            <i class="bi bi-{% if 'error' in message.tags %}exclamation-circle-fill{% else %}check-circle-fill{% endif %}"></i>{{ message }}
+        </div>{% endfor %}{% endif %}
+
+        <!-- RECENT USERS PREVIEW (dashboard only shows last 5) -->
+        <div class="table-card recent-users-card">
+            <div class="table-card-header">
+                <div class="table-card-title">👥 Recent Users</div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Date Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profile in user_profiles|slice:":5" %}
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div style="width:34px;height:34px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;">{{ profile.user.username|first|upper }}</div>
+                                    <div style="font-weight:700;font-size:0.85rem;">{{ profile.user.username }}</div>
+                                </div>
+                            </td>
+                            <td style="color:var(--text-muted);font-size:0.82rem;">{{ profile.user.email|default:"—" }}</td>
+                            <td><span class="role-badge role-{{ profile.role }}">{{ profile.role|capfirst }}</span></td>
+                            <td style="color:var(--text-muted);font-size:0.8rem;">{{ profile.user.date_joined|date:"M d, Y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="padding:40px;text-align:center;color:var(--text-muted);">No users found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="bi bi-trash-fill"></i></div>
+        <div class="modal-title">Confirm Delete</div>
+        <div class="modal-msg" id="deleteModalMsg">Are you sure? This cannot be undone.</div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button class="modal-confirm" id="deleteConfirmBtn">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ROSTER MODAL -->
+<div class="modal-overlay" id="rosterModal">
+    <div class="modal-box wide">
+        <div class="modal-title" id="rosterModalTitle">Student List</div>
+        <div class="modal-msg" style="margin-bottom:0;">Assigned students only</div>
+        <div class="student-list" id="rosterModalList"></div>
+        <div class="modal-actions" style="margin-top:18px;">
+            <button class="modal-cancel" onclick="closeRosterModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function openRosterModal(sourceId, teacherName){
+    const source = document.getElementById(sourceId);
+    document.getElementById('rosterModalTitle').textContent = teacherName + "'s Students";
+    document.getElementById('rosterModalList').innerHTML = source ? source.innerHTML : '<div class="student-empty">No students assigned yet.</div>';
+    document.getElementById('rosterModal').classList.add('show');
+}
+function closeRosterModal(){document.getElementById('rosterModal').classList.remove('show');}
+function confirmDelete(formId,name){
+    document.getElementById('deleteModalMsg').textContent='Are you sure you want to delete "'+name+'"? This cannot be undone.';
+    document.getElementById('deleteConfirmBtn').onclick=function(){document.getElementById(formId).submit();};
+    document.getElementById('deleteModal').classList.add('show');
+}
+function closeDeleteModal(){document.getElementById('deleteModal').classList.remove('show');}
+document.getElementById('rosterModal').addEventListener('click',function(e){if(e.target===this)closeRosterModal();});
+document.getElementById('deleteModal').addEventListener('click',function(e){if(e.target===this)closeDeleteModal();});
+</script>
+<!-- Sign Out Confirmation Modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;">🚪</div>
+        <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Sign Out?</h5>
+        <p style="font-size:.83rem;color:#64748b;margin:0 0 24px;">Are you sure you want to sign out of Inclusive Classroom?</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">
+                Cancel
+            </button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                Yes, Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
