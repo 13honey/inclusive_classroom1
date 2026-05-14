@@ -81,9 +81,6 @@
         .s-icon{width:26px;flex-shrink:0;color:var(--text-muted);font-size:.82rem;text-align:center;}
         .s-label{font-size:.63rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;min-width:90px;}
         .s-value{font-size:.82rem;font-weight:600;color:var(--text);flex:1;}
-        .badge-pill{display:inline-flex;align-items:center;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:700;margin:1px;}
-        .badge-hearing{background:#fce7f3;color:#be185d;} .badge-visual{background:#d1fae5;color:#065f46;}
-        .badge-down{background:#fef3c7;color:#92400e;} .badge-multiple{background:#ede9fe;color:#5b21b6;}
         .assess-badge{display:inline-flex;align-items:center;gap:4px;background:#f5f3ff;color:#5b21b6;border-radius:20px;padding:3px 9px;font-size:.68rem;font-weight:700;}
         .assess-badge-graded{background:var(--primary-light);color:var(--primary);}
 
@@ -135,14 +132,30 @@
         <div class="nav-label">My Learning</div>
         <a href="{% url 'student_profile' %}" class="nav-item"><i class="bi bi-person-circle"></i> My Profile</a>
         <a href="{% url 'student_tasks' %}" class="nav-item"><i class="bi bi-list-task"></i> Task Wall</a>
+
+        {% with student_subjects=request.user.student.subjects.all %}
+            {% if student_subjects %}
+            <div class="nav-label">Subjects</div>
+            {% for subj in student_subjects %}
+            <a href="{% url 'student_subject_detail' subj.id %}" class="nav-item">
+                <span style="font-size:.9rem;width:17px;text-align:center;">{{ subj.icon }}</span> {{ subj.name }}
+            </a>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
     </nav>
     <div class="sidebar-footer">
         <div class="user-chip">
-            {% if student and student.profile_picture %}<img src="{{ student.profile_picture.url }}" class="user-avatar">
-            {% else %}<div class="user-avatar-fallback">{{ student.name|first|upper }}</div>{% endif %}
+            {% if student and student.profile_picture %}
+                <img src="{{ student.profile_picture.url }}" class="user-avatar">
+            {% else %}
+                <div class="user-avatar-fallback">{{ student.name|first|upper }}</div>
+            {% endif %}
             <div><div class="user-name">{{ student.name }}</div><div class="user-role">Student</div></div>
         </div>
-        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn">
+            <i class="bi bi-box-arrow-left"></i> Sign Out
+        </a>
     </div>
 </aside>
 
@@ -157,8 +170,11 @@
         <!-- HERO -->
         <div class="hero">
             <div class="hero-inner">
-                {% if student.profile_picture %}<img src="{{ student.profile_picture.url }}" class="hero-avatar">
-                {% else %}<div class="hero-avatar-fallback">{{ student.name|first }}</div>{% endif %}
+                {% if student.profile_picture %}
+                    <img src="{{ student.profile_picture.url }}" class="hero-avatar">
+                {% else %}
+                    <div class="hero-avatar-fallback">{{ student.name|first }}</div>
+                {% endif %}
                 <div>
                     <div class="hero-name">Welcome, {{ student.name }}!</div>
                     <div class="hero-meta">
@@ -178,10 +194,10 @@
             <div class="stat-card"><div class="stat-icon si-amber"><i class="bi bi-clock-fill"></i></div><div><div class="stat-value">{{ pending_tasks }}</div><div class="stat-label">Pending</div></div></div>
         </div>
 
-        <!-- DASHBOARD GRID: Profile Summary + Task Progress -->
+        <!-- DASHBOARD GRID -->
         <div class="dash-grid">
 
-            <!-- PROFILE SUMMARY (preview only, not full page) -->
+            <!-- PROFILE SUMMARY -->
             <div class="summary-card">
                 <div class="summary-head">
                     <div class="summary-head-title"><i class="bi bi-person-circle"></i> Profile Summary</div>
@@ -198,34 +214,49 @@
                     </div></div>
                     <div class="s-row"><div class="s-icon"><i class="bi bi-envelope-fill"></i></div><div class="s-label">Email</div><div class="s-value" style="font-size:.78rem;">{{ student.email|default:"Not provided" }}</div></div>
                     <div class="s-row"><div class="s-icon"><i class="bi bi-calendar-check-fill"></i></div><div class="s-label">Enrolled</div><div class="s-value">{{ student.enrolled_date }}</div></div>
+
+                    <!-- Subjects enrolled -->
+                    {% with student_subjects=request.user.student.subjects.all %}
+                    {% if student_subjects %}
+                    <div class="s-row">
+                        <div class="s-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+                        <div class="s-label">Subjects</div>
+                        <div class="s-value" style="display:flex;flex-wrap:wrap;gap:4px;">
+                            {% for subj in student_subjects %}
+                            <a href="{% url 'student_subject_detail' subj.id %}"
+                               style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:var(--primary-light);color:var(--primary);font-size:.68rem;font-weight:700;text-decoration:none;">
+                                {{ subj.icon }} {{ subj.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </div>
             </div>
 
-            <!-- TASK PROGRESS OVERVIEW (not full TaskWall) -->
+            <!-- TASK PROGRESS -->
             <div class="progress-card">
                 <div class="progress-head">
                     <div class="progress-head-title"><i class="bi bi-bar-chart-fill"></i> Task Progress</div>
                     <a href="{% url 'student_tasks' %}" class="view-link">View All <i class="bi bi-chevron-right"></i></a>
                 </div>
                 <div class="progress-body">
-                    <!-- Overall progress bar -->
                     {% if total_tasks > 0 %}
                     <div class="prog-stat">
                         <div class="prog-label">Overall Completion</div>
                         <div class="prog-val">{{ done_tasks }}/{{ total_tasks }}</div>
                     </div>
                     <div class="prog-bar-wrap">
-                        <div class="prog-bar green" style="width:{% if total_tasks > 0 %}{% widthratio done_tasks total_tasks 100 %}%{% else %}0%{% endif %};"></div>
+                        <div class="prog-bar green" style="width:{% widthratio done_tasks total_tasks 100 %}%;"></div>
                     </div>
-                    <!-- Pending progress bar -->
                     <div class="prog-stat">
                         <div class="prog-label">Pending Tasks</div>
                         <div class="prog-val">{{ pending_tasks }}</div>
                     </div>
                     <div class="prog-bar-wrap">
-                        <div class="prog-bar amber" style="width:{% if total_tasks > 0 %}{% widthratio pending_tasks total_tasks 100 %}%{% else %}0%{% endif %};"></div>
+                        <div class="prog-bar amber" style="width:{% widthratio pending_tasks total_tasks 100 %}%;"></div>
                     </div>
-                    <!-- Recent tasks preview (max 3) -->
                     <div style="margin-top:4px;font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Recent Tasks</div>
                     {% for task in recent_tasks %}
                     <div class="task-mini">
@@ -260,22 +291,16 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const HEARTBEAT_URL = "{% url 'student_heartbeat' %}?student={{ student.id }}";
-
 function sendHeartbeat() {
     fetch(HEARTBEAT_URL, {credentials: 'same-origin'})
         .then(r => r.json())
-        .then(data => {
-            if (!data.ok && window.studentHeartbeatTimer) {
-                clearInterval(window.studentHeartbeatTimer);
-            }
-        })
+        .then(data => { if (!data.ok && window.studentHeartbeatTimer) clearInterval(window.studentHeartbeatTimer); })
         .catch(() => {});
 }
-
 sendHeartbeat();
 window.studentHeartbeatTimer = setInterval(sendHeartbeat, 30000);
 </script>
-<!-- Sign Out Confirmation Modal -->
+
 <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
         <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;">🚪</div>
@@ -283,13 +308,9 @@ window.studentHeartbeatTimer = setInterval(sendHeartbeat, 30000);
         <p style="font-size:.83rem;color:#64748b;margin:0 0 24px;">Are you sure you want to sign out of Inclusive Classroom?</p>
         <div style="display:flex;gap:10px;justify-content:center;">
             <button onclick="document.getElementById('logoutModal').style.display='none'"
-                    style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">
-                Cancel
-            </button>
+                    style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">Cancel</button>
             <a href="{% url 'logout' %}"
-               style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">
-                Yes, Sign Out
-            </a>
+               style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">Yes, Sign Out</a>
         </div>
     </div>
 </div>

@@ -31,6 +31,33 @@ class Classification(models.Model):
         return self.get_name_display()
 
 
+class Subject(models.Model):
+    ICON_CHOICES = [
+        ('🗣️', 'Communication'),
+        ('🤲', 'Motor Skills'),
+        ('🧠', 'Cognitive'),
+        ('👥', 'Social Skills'),
+        ('🪥', 'Self-Care'),
+        ('📖', 'Academic'),
+        ('🎨', 'Creative Arts'),
+        ('🏃', 'Physical'),
+        ('📚', 'General'),
+    ]
+    name        = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    icon        = models.CharField(max_length=10, default='📚')
+    color       = models.CharField(max_length=20, default='#2563eb', help_text='Hex color e.g. #2563eb')
+    created_by  = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='subjects_created')
+    created_at  = models.DateTimeField(auto_now_add=True)
+    students    = models.ManyToManyField('Student', blank=True, related_name='subjects')
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Student(models.Model):
 
     GRADING_CHOICES = [
@@ -103,6 +130,7 @@ class Task(models.Model):
         ('completed', 'Completed'),
     )
     student     = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='tasks')
+    subject     = models.ForeignKey('Subject', on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
     title       = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     deadline    = models.DateTimeField()
@@ -185,6 +213,20 @@ class TaskEvaluation(models.Model):
     @property
     def stars(self):
         return '⭐' * (self.enjoyment or 0)
+
+
+class TaskRecording(models.Model):
+    task         = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='recordings')
+    student      = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='task_recordings')
+    subject      = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True, related_name='task_recordings')
+    video_file   = models.FileField(upload_to='task_recordings/')
+    recorded_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-recorded_at']
+
+    def __str__(self):
+        return f"Recording for '{self.task.title}' - {self.student.name}"
 
 
 class TeacherFeedback(models.Model):

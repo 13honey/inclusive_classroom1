@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Inclusive Classroom Admin{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">Inclusive Classroom Administration</a>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+<div style="display:flex;gap:12px;align-items:center;">
+    <a href="{% url 'admin:index' %}" style="color:#fff;text-decoration:none;font-weight:700;">Records</a>
+    <a href="{% url 'admin:media_library' %}" style="color:#fff;text-decoration:none;font-weight:700;">Media Library</a>
+    <a href="/admin-dashboard/" style="color:#fff;text-decoration:none;font-weight:700;">Custom Dashboard</a>
+</div>
+{% endblock %}

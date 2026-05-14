@@ -2,15 +2,18 @@ from django import template
 
 register = template.Library()
 
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
 
 @register.filter
 def abbreviate_name(value):
-    if not value:
+    parts = str(value or '').split()
+    if not parts:
         return ''
-
-    parts = str(value).split()
-    if len(parts) <= 1:
-        return str(value)
-
-    initials = [f'{part[0].upper()}.' for part in parts[:-1] if part]
-    return ' '.join(initials + [parts[-1]])
+    if len(parts) == 1:
+        return parts[0]
+    first = parts[0]
+    initials = ' '.join(f'{part[0]}.' for part in parts[1:] if part)
+    return f'{first} {initials}'

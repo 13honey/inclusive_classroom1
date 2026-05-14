@@ -1,0 +1,418 @@
+{% extends 'classroom/base.html' %}
+{% block title %}{{ subject.name }} | Inclusive Classroom{% endblock %}
+{% block page_title %}{{ subject.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .subject-page-surface{--subject-color:#2563eb;min-height:calc(100vh - 102px);margin:-22px -26px;padding:24px 26px;background:linear-gradient(145deg,color-mix(in srgb,var(--subject-color) 18%,#f8fafc),#f1f5f9 58%);}
+    .subject-hero{background:linear-gradient(135deg,color-mix(in srgb,var(--subject-color) 24%,white),rgba(255,255,255,.92));border-radius:12px;border:1px solid color-mix(in srgb,var(--subject-color) 28%,var(--border));padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;box-shadow:0 10px 28px rgba(15,23,42,.05);}
+    .subject-icon-big{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--subject-color) 24%,white);}
+    .stats-row{display:none;}
+    .stat-box{background:white;border-radius:10px;border:1px solid var(--border);padding:14px 16px;text-align:center;}
+    .stat-num{font-size:1.4rem;font-weight:800;color:var(--text);font-family:'Fraunces',serif;}
+    .stat-label{font-size:.68rem;color:var(--text-muted);font-weight:600;margin-top:2px;}
+    .task-list-wrap{display:grid;gap:14px;}
+    .task-card{background:rgba(255,255,255,.96);border-radius:14px;border:1px solid color-mix(in srgb,var(--subject-color) 22%,var(--border));margin-bottom:0;overflow:hidden;transition:box-shadow .2s,transform .2s,border-color .2s;position:relative;box-shadow:0 10px 26px rgba(15,23,42,.05);}
+    .task-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--subject-color);}
+    .task-card:hover{box-shadow:0 16px 34px color-mix(in srgb,var(--subject-color) 18%,rgba(15,23,42,.12));transform:translateY(-2px);border-color:color-mix(in srgb,var(--subject-color) 38%,var(--border));}
+    .task-card-body{padding:18px 20px 16px 24px;}
+    .task-title{font-size:1rem;font-weight:900;color:var(--text);letter-spacing:0;}
+    .task-desc{font-size:.8rem;color:var(--text-muted);margin-top:6px;line-height:1.55;max-width:70ch;}
+    .task-meta{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:.75rem;color:var(--text-muted);flex-wrap:wrap;}
+    .task-meta span{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--subject-color) 8%,white);border:1px solid color-mix(in srgb,var(--subject-color) 16%,var(--border));border-radius:999px;padding:5px 10px;font-weight:700;}
+    .task-footer{padding:14px 20px 16px 24px;border-top:1px solid color-mix(in srgb,var(--subject-color) 14%,var(--border));background:linear-gradient(135deg,rgba(248,250,252,.9),color-mix(in srgb,var(--subject-color) 6%,white));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .badge-done{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;background:#d1fae5;color:#065f46;font-size:.72rem;font-weight:700;}
+    .badge-pending{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:700;}
+    .badge-overdue{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;background:#fee2e2;color:#991b1b;font-size:.72rem;font-weight:700;}
+    .task-action-area{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .btn-complete{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;background:var(--subject-color);color:white;font-family:inherit;font-weight:900;font-size:.82rem;border:none;cursor:pointer;transition:filter .15s,transform .15s,box-shadow .15s;box-shadow:0 8px 18px color-mix(in srgb,var(--subject-color) 30%,transparent);}
+    .btn-complete:hover{filter:brightness(.95);transform:translateY(-1px);}
+    .media-link{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:9px;background:white;border:1px solid color-mix(in srgb,var(--subject-color) 18%,var(--border));color:var(--subject-color);font-family:inherit;font-size:.72rem;font-weight:800;text-decoration:none;cursor:pointer;}
+    .media-link:hover{background:color-mix(in srgb,var(--subject-color) 9%,white);color:var(--subject-color);}
+    .media-link.file{background:white;color:var(--subject-color);}
+    .media-link.file:hover{background:color-mix(in srgb,var(--subject-color) 9%,white);}
+    .camera-overlay{display:none;position:fixed;right:18px;bottom:18px;z-index:9999;width:240px;max-width:calc(100vw - 28px);}
+    .camera-overlay.show{display:block;}
+    .camera-modal{width:100%;background:white;border:1px solid rgba(226,232,240,.95);border-radius:14px;overflow:hidden;box-shadow:0 16px 42px rgba(15,23,42,.22);}
+    .camera-head{padding:9px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:move;touch-action:none;background:white;}
+    .camera-title{font-size:.72rem;font-weight:800;display:flex;align-items:center;gap:6px;line-height:1.2;}
+    .recording-pill{display:inline-flex;align-items:center;gap:5px;font-size:.62rem;font-weight:800;color:#991b1b;background:#fee2e2;border-radius:999px;padding:4px 8px;white-space:nowrap;}
+    .recording-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:pulseDot 1s infinite;}
+    @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.35}}
+    .camera-preview-wrap{background:#020617;position:relative;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;}
+    .camera-preview{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
+    .camera-status{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(15,23,42,.78);color:white;border-radius:8px;padding:6px 8px;font-size:.66rem;font-weight:700;line-height:1.35;}
+    .camera-actions{padding:9px 10px;display:flex;align-items:center;gap:8px;background:white;}
+    .camera-help{font-size:.66rem;color:var(--text-muted);font-weight:700;line-height:1.35;flex:1;}
+    .btn-record-done{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:9px;background:var(--success);color:white;padding:8px 11px;font-family:inherit;font-size:.75rem;font-weight:800;cursor:pointer;white-space:nowrap;}
+    .btn-record-done:disabled{opacity:.65;cursor:wait;}
+    .material-viewer{display:none;position:fixed;inset:0;z-index:9997;background:rgba(241,245,249,.98);padding:18px 18px 92px;}
+    .material-viewer.show{display:flex;flex-direction:column;}
+    .material-head{height:50px;display:flex;align-items:center;gap:10px;background:white;border:1px solid var(--border);border-radius:12px;padding:0 14px;margin-bottom:12px;box-shadow:0 8px 22px rgba(15,23,42,.06);}
+    .material-title{font-size:.9rem;font-weight:800;display:flex;align-items:center;gap:8px;min-width:0;}
+    .material-title span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .material-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+    .material-open{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--text-muted);font-size:.75rem;font-weight:800;text-decoration:none;}
+    .material-close{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border:0;border-radius:8px;background:#fee2e2;color:#991b1b;font-family:inherit;font-size:.75rem;font-weight:800;cursor:pointer;}
+    .material-frame-wrap{flex:1;min-height:0;background:#020617;border-radius:14px;overflow:hidden;border:1px solid #0f172a;box-shadow:0 18px 45px rgba(15,23,42,.16);}
+    .material-frame,.material-video{width:100%;height:100%;border:0;background:#020617;display:none;}
+    .material-frame.show,.material-video.show{display:block;}
+    @media(max-width:640px){.camera-overlay{right:10px;bottom:10px;width:190px}.camera-help{display:none}.camera-title span{display:none}}
+    .empty-state{text-align:center;padding:60px 24px;color:var(--text-muted);}
+    .empty-state i{font-size:2.5rem;opacity:.2;display:block;margin-bottom:12px;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="subject-page-surface" style="--subject-color:{{ subject.color|default:'#2563eb' }};">
+
+<!-- Subject Hero -->
+<div class="subject-hero">
+    <div class="subject-icon-big">{{ subject.icon }}</div>
+    <div>
+        <div style="font-size:1.05rem;font-weight:800;">{{ subject.name }}</div>
+        {% if subject.description %}
+        <div style="font-size:.8rem;color:var(--text-muted);margin-top:3px;">{{ subject.description }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stats — computed in view -->
+<div class="stats-row">
+    <div class="stat-box">
+        <div class="stat-num">{{ total_tasks }}</div>
+        <div class="stat-label">Total Tasks</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-num" style="color:var(--success);">{{ done_tasks }}</div>
+        <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-num" style="color:var(--warning);">{{ pending_tasks }}</div>
+        <div class="stat-label">Pending</div>
+    </div>
+</div>
+
+<!-- Task List -->
+{% if tasks %}
+<div class="task-list-wrap">
+    {% for task in tasks %}
+    <div class="task-card">
+        <div class="task-card-body">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                <div style="flex:1;min-width:0;">
+                    <div class="task-title">{{ task.title }}</div>
+                    {% if task.description %}
+                    <div class="task-desc">{{ task.description }}</div>
+                    {% endif %}
+                    <div class="task-meta">
+                        <span><i class="bi bi-calendar3"></i> Due {{ task.deadline|date:"M d, Y g:i A" }}</span>
+                        {% if task.completed_at %}
+                        <span><i class="bi bi-check-circle-fill" style="color:var(--success);"></i> Done {{ task.completed_at|date:"M d, Y" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    {% if task.status == 'completed' %}
+                        <span class="badge-done"><i class="bi bi-check-circle-fill"></i> Done</span>
+                    {% elif task.deadline < now %}
+                        <span class="badge-overdue"><i class="bi bi-exclamation-circle-fill"></i> Overdue</span>
+                    {% else %}
+                        <span class="badge-pending"><i class="bi bi-clock-fill"></i> Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="task-footer">
+            <div class="task-action-area">
+                {% if task.status == 'completed' %}
+                    {% if task.video_url %}
+                    <a href="{{ task.video_url }}" target="_blank" class="media-link">
+                        <i class="bi bi-play-circle-fill"></i> Watch Video
+                    </a>
+                    {% endif %}
+                    {% if task.video_file %}
+                    <a href="{{ task.video_file.url }}" target="_blank" class="media-link">
+                        <i class="bi bi-play-circle-fill"></i> Video File
+                    </a>
+                    {% endif %}
+                    {% if task.attachment %}
+                    <a href="{{ task.attachment.url }}" target="_blank" class="media-link file">
+                        <i class="bi bi-paperclip"></i> Attachment
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% if task.status != 'completed' %}
+            <form method="POST" action="{% url 'complete_task' task.id %}" enctype="multipart/form-data" onsubmit="event.preventDefault(); startTaskRecording('{{ task.id }}', this.action{% if task.video_url %}, '{{ task.video_url|escapejs }}'{% elif task.video_file %}, '{{ task.video_file.url|escapejs }}'{% elif task.attachment %}, '{{ task.attachment.url|escapejs }}'{% endif %});">
+                {% csrf_token %}
+                <button type="submit" class="btn-complete">
+                    <i class="bi bi-camera-video-fill"></i> {% if task.video_url or task.video_file %}Start Recording &amp; Watch{% elif task.attachment %}Start Recording &amp; Open{% else %}Start Task{% endif %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-clipboard"></i>
+    <div style="font-weight:800;margin-bottom:6px;color:var(--text);">No tasks yet</div>
+    <div style="font-size:.82rem;">Your teacher hasn't assigned any tasks under this subject yet.</div>
+</div>
+{% endif %}
+
+<div class="camera-overlay" id="cameraOverlay">
+    <div class="camera-modal">
+        <div class="camera-head" id="cameraDragHandle" title="Drag camera preview">
+            <div class="camera-title"><i class="bi bi-camera-video-fill"></i> <span>Recording</span></div>
+            <div class="recording-pill"><span class="recording-dot"></span> Recording</div>
+        </div>
+        <div class="camera-preview-wrap">
+            <video id="cameraPreview" class="camera-preview" autoplay muted playsinline></video>
+            <div class="camera-status" id="cameraStatus">Requesting camera permission...</div>
+        </div>
+        <div class="camera-actions">
+            <div class="camera-help">Recording in the background.</div>
+            <button type="button" class="btn-record-done" id="recordDoneBtn" onclick="finishTaskRecording()">
+                <i class="bi bi-check-circle-fill"></i> Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="material-viewer" id="materialViewer">
+    <div class="material-head">
+        <div class="material-title"><i class="bi bi-play-circle-fill"></i> <span>Learning Material</span></div>
+        <div class="material-actions">
+            <a href="#" target="_blank" rel="noopener" class="material-open" id="materialOpenLink"><i class="bi bi-box-arrow-up-right"></i> Open tab</a>
+            <button type="button" class="material-close" onclick="closeMaterialViewer()"><i class="bi bi-x-lg"></i> Close</button>
+        </div>
+    </div>
+    <div class="material-frame-wrap">
+        <iframe id="materialFrame" class="material-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        <video id="materialVideo" class="material-video" controls playsinline></video>
+    </div>
+</div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let mediaRecorder = null;
+let cameraStream = null;
+let recordedChunks = [];
+let recordingTaskId = null;
+let recordingCompleteUrl = '';
+let cameraDragReady = false;
+
+function getCookie(name) {
+    let value = null;
+    document.cookie.split(';').forEach(cookie => {
+        const [key, rawValue] = cookie.trim().split('=');
+        if (key === name) value = decodeURIComponent(rawValue);
+    });
+    return value;
+}
+function preferredMimeType() {
+    const options = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    return options.find(type => window.MediaRecorder && MediaRecorder.isTypeSupported(type)) || '';
+}
+function setCameraStatus(message) {
+    document.getElementById('cameraStatus').textContent = message;
+}
+function youtubeEmbedUrl(rawUrl) {
+    try {
+        const url = new URL(rawUrl, window.location.origin);
+        if (url.hostname.includes('youtube.com')) {
+            const id = url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop();
+            return id ? `https://www.youtube.com/embed/${id}?autoplay=1&rel=0` : rawUrl;
+        }
+        if (url.hostname.includes('youtu.be')) {
+            const id = url.pathname.split('/').filter(Boolean)[0];
+            return id ? `https://www.youtube.com/embed/${id}?autoplay=1&rel=0` : rawUrl;
+        }
+    } catch (error) {}
+    return rawUrl;
+}
+function isYouTubeUrl(rawUrl) {
+    try {
+        const host = new URL(rawUrl, window.location.origin).hostname.toLowerCase();
+        return host.includes('youtube.com') || host.includes('youtu.be');
+    } catch (error) {
+        return false;
+    }
+}
+function openMaterialViewer(materialUrl) {
+    if (!materialUrl) return;
+    const viewer = document.getElementById('materialViewer');
+    const frame = document.getElementById('materialFrame');
+    const video = document.getElementById('materialVideo');
+    const openLink = document.getElementById('materialOpenLink');
+    frame.classList.remove('show');
+    video.classList.remove('show');
+    frame.src = 'about:blank';
+    video.removeAttribute('src');
+    openLink.href = materialUrl;
+
+    const lowerUrl = materialUrl.toLowerCase();
+    const isVideoFile = /\.(mp4|webm|ogg|mov)(\?|#|$)/.test(lowerUrl);
+    if (isVideoFile) {
+        video.src = materialUrl;
+        video.classList.add('show');
+        video.play().catch(() => {});
+    } else {
+        frame.src = youtubeEmbedUrl(materialUrl);
+        frame.classList.add('show');
+    }
+    viewer.classList.add('show');
+}
+function closeMaterialViewer() {
+    const viewer = document.getElementById('materialViewer');
+    const frame = document.getElementById('materialFrame');
+    const video = document.getElementById('materialVideo');
+    viewer.classList.remove('show');
+    frame.src = 'about:blank';
+    video.pause();
+    video.removeAttribute('src');
+}
+function initFloatingCameraDrag() {
+    if (cameraDragReady) return;
+    cameraDragReady = true;
+    const overlay = document.getElementById('cameraOverlay');
+    const handle = document.getElementById('cameraDragHandle');
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+
+    handle.addEventListener('pointerdown', (event) => {
+        dragging = true;
+        const rect = overlay.getBoundingClientRect();
+        startX = event.clientX;
+        startY = event.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+        overlay.style.left = `${rect.left}px`;
+        overlay.style.top = `${rect.top}px`;
+        overlay.style.right = 'auto';
+        overlay.style.bottom = 'auto';
+        handle.setPointerCapture(event.pointerId);
+    });
+
+    handle.addEventListener('pointermove', (event) => {
+        if (!dragging) return;
+        const nextLeft = startLeft + event.clientX - startX;
+        const nextTop = startTop + event.clientY - startY;
+        const maxLeft = window.innerWidth - overlay.offsetWidth - 8;
+        const maxTop = window.innerHeight - overlay.offsetHeight - 8;
+        overlay.style.left = `${Math.max(8, Math.min(nextLeft, maxLeft))}px`;
+        overlay.style.top = `${Math.max(8, Math.min(nextTop, maxTop))}px`;
+    });
+
+    handle.addEventListener('pointerup', (event) => {
+        dragging = false;
+        handle.releasePointerCapture(event.pointerId);
+    });
+
+    handle.addEventListener('pointercancel', () => {
+        dragging = false;
+    });
+}
+function stopRecordingTracks() {
+    if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+    document.getElementById('cameraPreview').srcObject = null;
+}
+async function startTaskRecording(taskId, completeUrl, materialUrl = '') {
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+        alert('Camera recording is not supported in this browser. Please use Chrome or Edge.');
+        return;
+    }
+    const opensInExternalTab = materialUrl && isYouTubeUrl(materialUrl);
+    if (opensInExternalTab) {
+        window.open(materialUrl, '_blank');
+    }
+    recordingTaskId = taskId;
+    recordingCompleteUrl = completeUrl;
+    recordedChunks = [];
+    document.getElementById('recordDoneBtn').disabled = true;
+    initFloatingCameraDrag();
+    document.getElementById('cameraOverlay').classList.add('show');
+    setCameraStatus('Requesting camera permission...');
+    try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user' },
+            audio: true
+        });
+        document.getElementById('cameraPreview').srcObject = cameraStream;
+        const mimeType = preferredMimeType();
+        mediaRecorder = new MediaRecorder(cameraStream, mimeType ? { mimeType } : undefined);
+        mediaRecorder.ondataavailable = event => {
+            if (event.data && event.data.size > 0) recordedChunks.push(event.data);
+        };
+        mediaRecorder.onstop = uploadTaskRecording;
+        mediaRecorder.start();
+        if (opensInExternalTab) {
+            setCameraStatus('Recording your camera and voice. Watch the YouTube tab, then return here and tap Done.');
+        } else if (materialUrl) {
+            openMaterialViewer(materialUrl);
+            setCameraStatus('Recording your camera and voice. Watch the material, then tap Done.');
+        } else {
+            setCameraStatus('Recording started. Perform your task now.');
+        }
+        document.getElementById('recordDoneBtn').disabled = false;
+    } catch (error) {
+        stopRecordingTracks();
+        document.getElementById('cameraOverlay').classList.remove('show');
+        alert('Camera permission is needed before you can complete this task.');
+    }
+}
+function finishTaskRecording() {
+    const doneBtn = document.getElementById('recordDoneBtn');
+    doneBtn.disabled = true;
+    setCameraStatus('Stopping recording and saving your video...');
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+    } else {
+        uploadTaskRecording();
+    }
+}
+function uploadTaskRecording() {
+    stopRecordingTracks();
+    const mimeType = mediaRecorder?.mimeType || preferredMimeType() || 'video/webm';
+    const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+    const blob = new Blob(recordedChunks, { type: mimeType });
+    if (!blob.size) {
+        document.getElementById('cameraOverlay').classList.remove('show');
+        alert('No video was recorded. Please try again.');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('recorded_video', blob, `task-${recordingTaskId}-${Date.now()}.${extension}`);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    fetch(recordingCompleteUrl, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('upload failed');
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('cameraOverlay').classList.remove('show');
+            window.location.href = data.evaluation_url || `/student-dashboard/tasks/?eval=${recordingTaskId}`;
+        })
+        .catch(() => {
+            document.getElementById('cameraOverlay').classList.remove('show');
+            alert('The recording could not be uploaded. Please check your connection and try again.');
+        });
+}
+</script>
+{% endblock %}

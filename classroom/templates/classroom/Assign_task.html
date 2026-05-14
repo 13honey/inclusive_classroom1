@@ -17,8 +17,6 @@
         }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-
-        /* ── Sidebar ── */
         .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:#0f172a;display:flex;flex-direction:column;z-index:100;}
         .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
         .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
@@ -37,22 +35,20 @@
         .user-role{font-size:.63rem;color:#475569;}
         .logout-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;color:#475569;font-size:.77rem;font-weight:600;text-decoration:none;transition:all .15s;}
         .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
-
-        /* ── Main layout ── */
         .main{margin-left:var(--sidebar-w);min-height:100vh;padding-bottom:80px;}
         .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
         .topbar-title{font-size:1rem;font-weight:800;}
         .topbar-chip{display:flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;margin-left:auto;}
         .page-content{padding:20px 26px;}
-
-        /* ── Alerts ── */
         .alert-success-custom{display:flex;align-items:center;gap:8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:9px;padding:11px 14px;font-size:.83rem;font-weight:700;color:#065f46;margin-bottom:14px;}
         .alert-danger-custom{display:flex;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:11px 14px;font-size:.83rem;font-weight:700;color:#991b1b;margin-bottom:14px;}
-
-        /* ── Layout grid ── */
-        .form-grid{display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start;}
-
-        /* ── Section Cards ── */
+        .validation-banner{display:none;align-items:flex-start;gap:9px;background:#fff7ed;border:1.5px solid #fed7aa;border-left:4px solid var(--warning);border-radius:10px;padding:11px 14px;font-size:.82rem;font-weight:700;color:#9a3412;margin-bottom:14px;box-shadow:0 8px 24px rgba(245,158,11,.12);}
+        .validation-banner.show{display:flex;}
+        .validation-banner i{font-size:1rem;margin-top:1px;flex-shrink:0;}
+        .validation-banner span{line-height:1.45;}
+        .form-grid{display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:stretch;}
+        .student-column{display:flex;min-height:100%;}
+        .student-column .section-card{display:flex;flex-direction:column;width:100%;margin-bottom:0;}
         .section-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px;animation:fadeUp .25s ease both;}
         .section-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);}
         .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
@@ -62,8 +58,6 @@
         .si-purple{background:var(--purple-light);color:var(--purple);}
         .section-title{font-size:.85rem;font-weight:800;}
         .section-sub{font-size:.67rem;color:var(--text-muted);margin-top:1px;}
-
-        /* ── Form fields ── */
         .form-body{padding:18px 20px;}
         .f-group{display:flex;flex-direction:column;margin-bottom:14px;}
         .f-group:last-child{margin-bottom:0;}
@@ -74,42 +68,36 @@
         .f-group input[type=url],
         .f-group input[type=datetime-local],
         .f-group select,
-        .f-group textarea{
-            width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);
-            font-family:inherit;font-size:.84rem;font-weight:500;outline:none;
-            color:var(--text);background:white;transition:border-color .15s,box-shadow .15s;
-        }
-        .f-group input:focus,.f-group select:focus,.f-group textarea:focus{
-            border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);
-        }
+        .f-group textarea{width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:.84rem;font-weight:500;outline:none;color:var(--text);background:white;transition:border-color .15s,box-shadow .15s;}
+        .f-group input:focus,.f-group select:focus,.f-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+        .f-group.has-error input,
+        .f-group.has-error select,
+        .f-group.has-error textarea{border-color:var(--danger);box-shadow:0 0 0 3px rgba(239,68,68,.1);}
         .f-group textarea{resize:vertical;min-height:88px;}
-        .f-group input[type=file]{
-            padding:6px 10px;background:var(--bg);cursor:pointer;
-            border-radius:8px;border:1.5px solid var(--border);width:100%;font-family:inherit;font-size:.82rem;
-        }
-
-        /* ── Student picker card ── */
-        .student-picker{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;padding:10px 12px;}
+        .f-group input[type=file]{padding:6px 10px;background:var(--bg);cursor:pointer;border-radius:8px;border:1.5px solid var(--border);width:100%;font-family:inherit;font-size:.82rem;}
+        .student-picker{display:flex;flex-direction:column;gap:6px;flex:1;min-height:520px;max-height:none;overflow-y:auto;padding:10px 12px;}
+        .section-card.has-error{border-color:#fca5a5;box-shadow:0 0 0 3px rgba(239,68,68,.08);}
         .student-option{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;background:white;}
         .student-option:hover{border-color:#bfdbfe;background:var(--primary-light);}
         .student-option.selected{border-color:var(--primary);background:var(--primary-light);}
-        .student-option input[type=radio]{accent-color:var(--primary);flex-shrink:0;}
+        .student-option input[type=checkbox]{accent-color:var(--primary);flex-shrink:0;width:15px;height:15px;}
         .so-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;overflow:hidden;}
         .so-avatar img{width:100%;height:100%;object-fit:cover;}
         .so-name{font-size:.82rem;font-weight:700;color:var(--text);}
         .so-handle{font-size:.68rem;color:var(--text-muted);margin-top:1px;}
         .so-badge{margin-left:auto;flex-shrink:0;}
-
         .badge{padding:2px 8px;border-radius:20px;font-size:.61rem;font-weight:700;white-space:nowrap;}
         .badge-blue{background:var(--primary-light);color:var(--primary);}
         .badge-purple{background:var(--purple-light);color:var(--purple);}
-        .badge-green{background:#ecfdf5;color:#065f46;}
-        .badge-amber{background:#fffbeb;color:#92400e;}
-
-        /* ── Divider ── */
-        .form-divider{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);padding:4px 0 10px;border-top:1px solid var(--border);margin-top:4px;margin-bottom:14px;}
-
-        /* ── Sticky save bar ── */
+        .select-all-btn{margin-left:auto;padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:white;font-size:.72rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .15s;white-space:nowrap;}
+        .select-all-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+        .preview-pill{display:none;align-items:center;gap:8px;background:var(--primary-light);border:1.5px solid #bfdbfe;border-radius:9px;padding:10px 13px;margin-bottom:14px;flex-wrap:wrap;}
+        .preview-pill.show{display:flex;}
+        .preview-pill-name{font-size:.8rem;font-weight:700;color:var(--primary);flex:1;}
+        .preview-pill-sub{font-size:.67rem;color:var(--text-muted);width:100%;}
+        .no-students{padding:28px 16px;text-align:center;color:var(--text-muted);}
+        .no-students i{font-size:2rem;opacity:.2;display:block;margin-bottom:8px;}
+        .no-students p{font-size:.82rem;font-weight:600;margin:0;}
         .sticky-bar{position:fixed;bottom:0;left:var(--sidebar-w);right:0;background:white;border-top:1px solid var(--border);padding:11px 26px;display:flex;align-items:center;justify-content:flex-end;gap:10px;z-index:50;box-shadow:0 -4px 16px rgba(0,0,0,.06);}
         .btn-cancel-bar{padding:8px 18px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);transition:all .15s;display:inline-flex;align-items:center;gap:5px;text-decoration:none;}
         .btn-cancel-bar:hover{background:#fef2f2;border-color:var(--danger);color:var(--danger);}
@@ -120,30 +108,12 @@
         .spinner.show{display:block;}
         @keyframes spin{to{transform:rotate(360deg);}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-        /* ── Preview panel ── */
-        .preview-pill{display:none;align-items:center;gap:8px;background:var(--primary-light);border:1.5px solid #bfdbfe;border-radius:9px;padding:8px 13px;margin-bottom:14px;}
-        .preview-pill.show{display:flex;}
-        .preview-pill-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem;flex-shrink:0;}
-        .preview-pill-name{font-size:.8rem;font-weight:700;color:var(--primary);}
-        .preview-pill-sub{font-size:.67rem;color:var(--text-muted);}
-
-        /* ── No students state ── */
-        .no-students{padding:28px 16px;text-align:center;color:var(--text-muted);}
-        .no-students i{font-size:2rem;opacity:.2;display:block;margin-bottom:8px;}
-        .no-students p{font-size:.82rem;font-weight:600;margin:0;}
-
-        @media(max-width:900px){.form-grid{grid-template-columns:1fr;}}
-        @media(max-width:768px){
-            .sidebar{transform:translateX(-100%);}
-            .main{margin-left:0;}
-            .sticky-bar{left:0;}
-        }
+        @media(max-width:900px){.form-grid{grid-template-columns:1fr;}.student-picker{min-height:260px;max-height:360px;}}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.sticky-bar{left:0;}}
     </style>
 </head>
 <body>
 
-<!-- ── Sidebar ── -->
 <aside class="sidebar">
     <div class="sidebar-logo">
         <div class="logo-icon">📚</div>
@@ -158,6 +128,7 @@
         <div class="nav-label">Management</div>
         <a href="{% url 'student_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> Students</a>
         <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'subject_list' %}" class="nav-item"><i class="bi bi-journal-bookmark-fill"></i> Subjects</a>
         <a href="{% url 'teacher_feedback' %}" class="nav-item"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
         <div class="nav-label">Tasks</div>
         <a href="{% url 'assign_task' %}" class="nav-item active"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
@@ -170,7 +141,7 @@
             <div class="user-avatar">{{ user.username|first|upper }}</div>
             <div>
                 <div class="user-name">{{ user.username }}</div>
-                <div class="user-role">Teacher</div>
+                <div class="user-role">SPED Teacher</div>
             </div>
         </div>
         <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn">
@@ -179,7 +150,6 @@
     </div>
 </aside>
 
-<!-- ── Main ── -->
 <main class="main">
     <div class="topbar">
         <div class="topbar-title">Assign Task</div>
@@ -200,28 +170,33 @@
 
         <form method="POST" enctype="multipart/form-data" id="assignForm" novalidate>
             {% csrf_token %}
-
+            <div class="validation-banner" id="validationBanner" role="alert" aria-live="polite">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span id="validationText"></span>
+            </div>
             <div class="form-grid">
 
-                <!-- ── LEFT: Student Picker ── -->
-                <div>
-                    <div class="section-card">
+                <!-- LEFT: Student Picker -->
+                <div class="student-column">
+                    <div class="section-card" id="studentSection">
                         <div class="section-head">
                             <div class="section-icon si-blue"><i class="bi bi-people-fill"></i></div>
                             <div>
-                                <div class="section-title">Select Student</div>
-                                <div class="section-sub">Who is this task for?</div>
+                                <div class="section-title">Select Students</div>
+                                <div class="section-sub">Pick one or more students</div>
                             </div>
+                            <button type="button" class="select-all-btn" id="selectAllBtn" onclick="toggleSelectAll()">
+                                Select All
+                            </button>
                         </div>
 
                         {% if students %}
                         <div class="student-picker" id="studentPicker">
                             {% for student in students %}
-                            <label class="student-option" id="opt-{{ student.id }}"
-                                   onclick="selectStudent('{{ student.id }}', '{{ student.name|escapejs }}')">
-                                <input type="radio" name="student_id" value="{{ student.id }}"
+                            <label class="student-option" id="opt-{{ student.id }}">
+                                <input type="checkbox" name="student_id" value="{{ student.id }}"
                                        {% if selected_student and selected_student.id == student.id %}checked{% endif %}
-                                       required>
+                                       onchange="onStudentChange(this)">
                                 <div class="so-avatar">
                                     {% if student.profile_picture %}
                                         <img src="{{ student.profile_picture.url }}" alt="{{ student.name }}">
@@ -254,17 +229,14 @@
                     </div>
                 </div>
 
-                <!-- ── RIGHT: Task Form ── -->
+                <!-- RIGHT: Task Form -->
                 <div>
 
-                    <!-- Selected student preview pill -->
+                    <!-- Selected students preview pill -->
                     <div class="preview-pill" id="selectedPill">
-                        <div class="preview-pill-avatar" id="pillAvatar">?</div>
-                        <div>
-                            <div class="preview-pill-name" id="pillName">No student selected</div>
-                            <div class="preview-pill-sub">Task will be assigned to this student</div>
-                        </div>
-                        <i class="bi bi-check-circle-fill" style="margin-left:auto;color:var(--primary);font-size:1rem;"></i>
+                        <i class="bi bi-check-circle-fill" style="color:var(--primary);font-size:1rem;flex-shrink:0;"></i>
+                        <div class="preview-pill-name" id="pillName"></div>
+                        <div class="preview-pill-sub">Task will be assigned to these students</div>
                     </div>
 
                     <!-- Task Details -->
@@ -277,21 +249,31 @@
                             </div>
                         </div>
                         <div class="form-body">
-                            <div class="f-group">
+                            <div class="f-group" id="subjectGroup">
+                                <label class="f-label"><i class="bi bi-journal-bookmark-fill"></i> Subject <span class="f-req">*</span></label>
+                                <select name="subject_id" id="subjectDropdown" required>
+                                    <option value="">— Select a subject —</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}" {% if selected_subject_id == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.icon }} {{ subject.name }}</option>
+                                    {% empty %}
+                                    <option disabled>No subjects yet — add one in Subjects first.</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="f-help">Required. <a href="{% url 'subject_list' %}" style="color:var(--primary);font-weight:700;">Manage subjects →</a></div>
+                            </div>
+                            <div class="f-group" id="titleGroup">
                                 <label class="f-label"><i class="bi bi-pencil-fill"></i> Task Title <span class="f-req">*</span></label>
                                 <input type="text" name="title" id="titleInput"
-                                       placeholder="e.g. Watch Video on Colors"
-                                       value="{{ form.title.value|default:'' }}" required>
+                                       placeholder="e.g. Watch Video on Colors" required>
                                 <div class="f-help">Give a clear, descriptive name for this task.</div>
                             </div>
-                            <div class="f-group">
+                            <div class="f-group" id="deadlineGroup">
                                 <label class="f-label"><i class="bi bi-text-paragraph"></i> Description</label>
-                                <textarea name="description" placeholder="Instructions or notes for the student…">{{ form.description.value|default:'' }}</textarea>
+                                <textarea name="description" placeholder="Instructions or notes for the student…"></textarea>
                             </div>
                             <div class="f-group">
                                 <label class="f-label"><i class="bi bi-calendar3"></i> Deadline <span class="f-req">*</span></label>
-                                <input type="datetime-local" name="deadline"
-                                       value="{{ form.deadline.value|default:'' }}" required>
+                                <input type="datetime-local" name="deadline" required>
                             </div>
                         </div>
                     </div>
@@ -307,12 +289,8 @@
                         </div>
                         <div class="form-body">
                             <div class="f-group">
-                                <label class="f-label">
-                                    <i class="bi bi-youtube" style="color:#ef4444;"></i> YouTube / Video Link
-                                </label>
-                                <input type="url" name="video_url"
-                                       placeholder="https://youtube.com/watch?v=…"
-                                       value="{{ form.video_url.value|default:'' }}">
+                                <label class="f-label"><i class="bi bi-youtube" style="color:#ef4444;"></i> YouTube / Video Link</label>
+                                <input type="url" name="video_url" placeholder="https://youtube.com/watch?v=…">
                                 <div class="f-help">Paste a YouTube or any video URL for the student to watch.</div>
                             </div>
                             <div class="f-group">
@@ -334,7 +312,7 @@
     </div>
 </main>
 
-<!-- ── Sticky Save Bar ── -->
+<!-- Sticky Save Bar -->
 <div class="sticky-bar">
     <a href="{% url 'student_list' %}" class="btn-cancel-bar">
         <i class="bi bi-x-lg"></i> Cancel
@@ -346,7 +324,7 @@
     </button>
 </div>
 
-<!-- ── Sign Out Modal ── -->
+<!-- Sign Out Modal -->
 <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
         <div style="width:48px;height:48px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem;">🚪</div>
@@ -354,91 +332,119 @@
         <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">Are you sure you want to sign out of Inclusive Classroom?</div>
         <div style="display:flex;gap:10px;">
             <button onclick="document.getElementById('logoutModal').style.display='none'"
-                    style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);">
-                Cancel
-            </button>
+                    style="flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);">Cancel</button>
             <a href="{% url 'logout' %}"
-               style="flex:1;padding:9px;border-radius:8px;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;text-decoration:none;display:flex;align-items:center;justify-content:center;">
-                Yes, Sign Out
-            </a>
+               style="flex:1;padding:9px;border-radius:8px;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;text-decoration:none;display:flex;align-items:center;justify-content:center;">Yes, Sign Out</a>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    /* ── Student selection ── */
-    function selectStudent(id, name) {
-        /* highlight selected card */
-        document.querySelectorAll('.student-option').forEach(el => el.classList.remove('selected'));
-        const opt = document.getElementById('opt-' + id);
-        if (opt) opt.classList.add('selected');
-
-        /* update preview pill */
-        document.getElementById('pillAvatar').textContent = name.charAt(0).toUpperCase();
-        document.getElementById('pillName').textContent = name;
-        document.getElementById('selectedPill').classList.add('show');
+    function getChecked() {
+        return [...document.querySelectorAll('input[name="student_id"]:checked')];
     }
-
-    /* ── On load: mark pre-selected student (if any, e.g. from query param) ── */
-    document.addEventListener('DOMContentLoaded', function () {
-        const checked = document.querySelector('input[name="student_id"]:checked');
-        if (checked) {
-            const label = checked.closest('.student-option');
-            if (label) {
-                label.classList.add('selected');
-                const nameEl = label.querySelector('.so-name');
-                if (nameEl) {
-                    document.getElementById('pillAvatar').textContent = nameEl.textContent.trim().charAt(0).toUpperCase();
-                    document.getElementById('pillName').textContent = nameEl.textContent.trim();
-                    document.getElementById('selectedPill').classList.add('show');
-                }
-            }
+    function onStudentChange(cb) {
+        cb.closest('.student-option').classList.toggle('selected', cb.checked);
+        updatePill();
+        updateSelectAllBtn();
+    }
+    function updatePill() {
+        const checked = getChecked();
+        const pill = document.getElementById('selectedPill');
+        const nameEl = document.getElementById('pillName');
+        if (checked.length === 0) {
+            pill.classList.remove('show');
+        } else {
+            const names = checked.map(cb => cb.closest('.student-option').querySelector('.so-name').textContent.trim());
+            nameEl.textContent = names.join(', ');
+            pill.classList.add('show');
         }
-
-        /* Pre-select from ?student= query param */
+    }
+    function toggleSelectAll() {
+        const checkboxes = document.querySelectorAll('input[name="student_id"]');
+        const allChecked = [...checkboxes].every(cb => cb.checked);
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+            cb.closest('.student-option').classList.toggle('selected', !allChecked);
+        });
+        updatePill();
+        updateSelectAllBtn();
+    }
+    function updateSelectAllBtn() {
+        const checkboxes = document.querySelectorAll('input[name="student_id"]');
+        const allChecked = checkboxes.length > 0 && [...checkboxes].every(cb => cb.checked);
+        document.getElementById('selectAllBtn').textContent = allChecked ? 'Deselect All' : 'Select All';
+    }
+    function clearValidation() {
+        document.getElementById('validationBanner').classList.remove('show');
+        document.getElementById('studentSection')?.classList.remove('has-error');
+        document.getElementById('subjectGroup')?.classList.remove('has-error');
+        document.getElementById('titleGroup')?.classList.remove('has-error');
+        document.getElementById('deadlineGroup')?.classList.remove('has-error');
+    }
+    function showValidation(message, target, errorElement) {
+        const banner = document.getElementById('validationBanner');
+        document.getElementById('validationText').textContent = message;
+        banner.classList.add('show');
+        errorElement?.classList.add('has-error');
+        target?.scrollIntoView({behavior:'smooth', block:'center'});
+        setTimeout(() => target?.focus?.({preventScroll:true}), 250);
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input[name="student_id"]:checked').forEach(cb => {
+            cb.closest('.student-option').classList.add('selected');
+        });
+        updatePill();
+        updateSelectAllBtn();
         const params = new URLSearchParams(window.location.search);
         const preId = params.get('student');
         if (preId) {
-            const radio = document.querySelector(`input[name="student_id"][value="${preId}"]`);
-            if (radio) {
-                radio.checked = true;
-                const label = radio.closest('.student-option');
-                if (label) {
-                    label.classList.add('selected');
-                    const nameEl = label.querySelector('.so-name');
-                    if (nameEl) {
-                        document.getElementById('pillAvatar').textContent = nameEl.textContent.trim().charAt(0).toUpperCase();
-                        document.getElementById('pillName').textContent = nameEl.textContent.trim();
-                        document.getElementById('selectedPill').classList.add('show');
-                    }
-                }
-            }
+            const cb = document.querySelector(`input[name="student_id"][value="${preId}"]`);
+            if (cb) { cb.checked = true; onStudentChange(cb); }
         }
     });
-
-    /* ── Validate & submit ── */
     function submitAssign() {
-        const studentPicked = document.querySelector('input[name="student_id"]:checked');
-        const title = document.getElementById('titleInput').value.trim();
-        const deadline = document.querySelector('input[name="deadline"]').value;
-
-        if (!studentPicked) {
-            alert('Please select a student first.');
-            document.getElementById('studentPicker')?.scrollIntoView({behavior:'smooth', block:'center'});
+        clearValidation();
+        const checked = getChecked();
+        const subjectDropdown = document.getElementById('subjectDropdown');
+        const titleInput = document.getElementById('titleInput');
+        const deadlineInput = document.querySelector('input[name="deadline"]');
+        const subject = subjectDropdown.value;
+        const title = titleInput.value.trim();
+        const deadline = deadlineInput.value;
+        if (checked.length === 0) {
+            showValidation(
+                'Select at least one student before assigning this task.',
+                document.getElementById('studentPicker') || document.getElementById('studentSection'),
+                document.getElementById('studentSection')
+            );
+            return;
+        }
+        if (!subject) {
+            showValidation(
+                'Select a subject before assigning this task.',
+                subjectDropdown,
+                document.getElementById('subjectGroup')
+            );
             return;
         }
         if (!title) {
-            alert('Please enter a task title.');
-            document.getElementById('titleInput').focus();
+            showValidation(
+                'Enter a task title so students know what activity to complete.',
+                titleInput,
+                document.getElementById('titleGroup')
+            );
             return;
         }
         if (!deadline) {
-            alert('Please set a deadline for this task.');
-            document.querySelector('input[name="deadline"]').focus();
+            showValidation(
+                'Set a deadline for this task before assigning it.',
+                deadlineInput,
+                document.getElementById('deadlineGroup')
+            );
             return;
         }
-
         const btn = document.getElementById('saveBtn');
         btn.disabled = true;
         document.getElementById('saveSpinner').classList.add('show');
@@ -446,8 +452,6 @@
         document.getElementById('saveTxt').textContent = 'Assigning…';
         document.getElementById('assignForm').submit();
     }
-
-    /* Logout modal backdrop close */
     document.getElementById('logoutModal').addEventListener('click', function(e) {
         if (e.target === this) this.style.display = 'none';
     });

@@ -17,7 +17,7 @@
 <nav class="navbar navbar-dark">
   <div class="container-fluid px-4">
     <span class="navbar-brand">🏫 Inclusive Classroom</span>
-    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-light btn-sm">← Back</a>
+    <a href="{% url 'admin_user_list' %}" class="btn btn-outline-light btn-sm">← Back</a>
   </div>
 </nav>
 
@@ -30,7 +30,7 @@
             <span class="text-muted" style="font-size:0.9rem;">This cannot be undone.</span></p>
             <form method="POST">
                 {% csrf_token %}
-                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary me-2">Cancel</a>
+                <a href="{% url 'admin_user_list' %}" class="btn btn-secondary me-2">Cancel</a>
                 <button type="submit" class="btn btn-danger">Yes, Delete</button>
             </form>
         </div>

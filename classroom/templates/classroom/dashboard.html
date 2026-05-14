@@ -55,12 +55,11 @@
         .stat-value{font-size:1.75rem;font-weight:800;line-height:1;font-family:'Fraunces',serif;}
         .stat-label{font-size:.73rem;color:var(--text-muted);font-weight:600;margin-top:2px;}
 
-        /* Activity Card — full width now */
+        /* Activity Card */
         .activity-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
         .card-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
         .card-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0;background:#ecfdf5;color:var(--success);}
         .card-title{font-size:.85rem;font-weight:800;}
-
         .activity-item{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background .12s;}
         .activity-item:last-child{border-bottom:none;}
         .activity-item:hover{background:#f8fafc;}
@@ -71,7 +70,6 @@
         .ab-done{background:#ecfdf5;color:#065f46;}
         .ab-overdue{background:#fef2f2;color:#991b1b;}
         .ab-pending{background:#fffbeb;color:#92400e;}
-
         .empty-state{padding:36px;text-align:center;color:var(--text-muted);}
         .empty-state i{font-size:2rem;opacity:.2;display:block;margin-bottom:10px;}
         .empty-state p{font-size:.82rem;font-weight:600;margin:0;}
@@ -106,6 +104,7 @@
         <div class="nav-label">Management</div>
         <a href="{% url 'student_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> Students</a>
         <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'subject_list' %}" class="nav-item"><i class="bi bi-journal-bookmark-fill"></i> Subjects</a>
         <a href="{% url 'teacher_feedback' %}" class="nav-item"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
         <div class="nav-label">Tasks</div>
         <a href="{% url 'assign_task' %}" class="nav-item"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
@@ -116,7 +115,7 @@
     <div class="sidebar-footer">
         <div class="user-chip">
             <div class="user-avatar">{{ user.username|first|upper }}</div>
-            <div><div class="user-name">{{ user.username }}</div><div class="user-role">Teacher</div></div>
+            <div><div class="user-name">{{ user.username }}</div><div class="user-role">SPED Teacher</div></div>
         </div>
         <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
     </div>
@@ -157,7 +156,7 @@
             </div>
         </div>
 
-        <!-- Recent Activity — full width -->
+        <!-- Recent Activity -->
         <div class="activity-card">
             <div class="card-head">
                 <div class="card-icon"><i class="bi bi-activity"></i></div>
@@ -207,7 +206,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Sign Out Confirmation Modal -->
 <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
         <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;">🚪</div>

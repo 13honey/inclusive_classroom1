@@ -175,6 +175,17 @@
         {% endif %}
         <a href="#teacher-feedback" class="nav-item nav-subitem profile-tab" data-target="teacher-feedback"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
         <a href="{% url 'student_tasks' %}" class="nav-item"><i class="bi bi-list-task"></i> Task Wall</a>
+
+        {% with student_subjects=request.user.student.subjects.all %}
+            {% if student_subjects %}
+            <div class="nav-label">Subjects</div>
+            {% for subj in student_subjects %}
+            <a href="{% url 'student_subject_detail' subj.id %}" class="nav-item">
+                <span style="font-size:.9rem;width:17px;text-align:center;">{{ subj.icon }}</span> {{ subj.name }}
+            </a>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
     </nav>
     <div class="sidebar-footer">
         <div class="user-chip">

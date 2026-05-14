@@ -1,0 +1,57 @@
+{% extends 'classroom/base.html' %}
+{% block title %}My Subjects | Inclusive Classroom{% endblock %}
+{% block page_title %}My Subjects{% endblock %}
+
+{% block extra_css %}
+<style>
+    .subjects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:8px;}
+    .subject-card{--subject-color:#2563eb;background:linear-gradient(145deg,color-mix(in srgb,var(--subject-color) 24%,white),color-mix(in srgb,var(--subject-color) 8%,white));border-radius:14px;border:1px solid color-mix(in srgb,var(--subject-color) 28%,var(--border));overflow:hidden;transition:all .2s;text-decoration:none;display:block;color:inherit;position:relative;}
+    .subject-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,color-mix(in srgb,var(--subject-color) 30%,transparent),transparent 44%);pointer-events:none;}
+    .subject-card:hover{box-shadow:0 12px 28px color-mix(in srgb,var(--subject-color) 20%,rgba(15,23,42,.12));transform:translateY(-2px);color:inherit;}
+    .subject-card-top{padding:20px;display:flex;align-items:center;gap:14px;position:relative;}
+    .subject-icon-wrap{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;background:rgba(255,255,255,.76);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--subject-color) 24%,white);}
+    .subject-name{font-size:.95rem;font-weight:800;color:var(--text);}
+    .subject-desc{font-size:.75rem;color:var(--text-muted);margin-top:3px;line-height:1.5;}
+    .subject-footer{padding:0 20px 16px;display:flex;align-items:center;justify-content:flex-end;position:relative;}
+    .task-count{display:none;}
+    .arrow{font-size:.8rem;color:var(--primary);font-weight:700;}
+    .empty-state{text-align:center;padding:60px 24px;color:var(--text-muted);}
+    .empty-state i{font-size:2.5rem;opacity:.2;display:block;margin-bottom:12px;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if subjects %}
+<div class="subjects-grid">
+    {% for subject in subjects %}
+    <a href="{% url 'student_subject_detail' subject.id %}" class="subject-card" style="--subject-color:{{ subject.color|default:'#2563eb' }};">
+        <div class="subject-card-top">
+            <div class="subject-icon-wrap">
+                {{ subject.icon }}
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div class="subject-name">{{ subject.name }}</div>
+                {% if subject.description %}
+                <div class="subject-desc">{{ subject.description }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="subject-footer">
+            {% with task_count=subject.tasks.count %}
+            <span class="task-count"><i class="bi bi-clipboard"></i> {{ task_count }} task{{ task_count|pluralize }}</span>
+            {% endwith %}
+            <span class="arrow">View tasks →</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-journal-bookmark"></i>
+    <div style="font-weight:800;margin-bottom:6px;color:var(--text);">No Subjects Yet</div>
+    <div style="font-size:.82rem;">Your teacher hasn't enrolled you in any subjects yet.</div>
+</div>
+{% endif %}
+
+{% endblock %}

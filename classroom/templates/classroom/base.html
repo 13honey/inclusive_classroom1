@@ -65,30 +65,91 @@
     </div>
     <nav class="sidebar-nav">
         {% with current=request.resolver_match.url_name %}
+
             {% if user.userprofile.role == 'admin' %}
                 <div class="nav-label">Overview</div>
-                <a href="{% url 'admin_dashboard' %}" class="nav-item {% if current == 'admin_dashboard' %}active{% endif %}"><i class="bi bi-grid-fill"></i> Dashboard</a>
-                <div class="nav-label">Users</div>
-                <a href="{% url 'admin_user_list' %}" class="nav-item {% if current == 'admin_user_list' %}active{% endif %}"><i class="bi bi-people-fill"></i> All Users</a>
-                <a href="{% url 'admin_add_user' %}" class="nav-item {% if current == 'admin_add_user' %}active{% endif %}"><i class="bi bi-person-plus-fill"></i> Add User</a>
+                <a href="{% url 'dashboard' %}" class="nav-item {% if current == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-fill"></i> Dashboard
+                </a>
+                <div class="nav-label">Classroom</div>
+                <a href="{% url 'student_list' %}" class="nav-item {% if current == 'student_list' or current == 'student_detail' or current == 'edit_student' %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i> Students
+                </a>
+                <a href="{% url 'subject_list' %}" class="nav-item {% if current == 'subject_list' or current == 'add_subject' or current == 'edit_subject' %}active{% endif %}">
+                    <i class="bi bi-journal-bookmark-fill"></i> Subjects
+                </a>
+                <a href="{% url 'assign_task' %}" class="nav-item {% if current == 'assign_task' %}active{% endif %}">
+                    <i class="bi bi-clipboard-plus-fill"></i> Assign Task
+                </a>
+                <a href="{% url 'task_history' %}" class="nav-item {% if current == 'task_history' %}active{% endif %}">
+                    <i class="bi bi-journal-text"></i> Task History
+                </a>
+                <a href="{% url 'student_monitoring' %}" class="nav-item {% if current == 'student_monitoring' %}active{% endif %}">
+                    <i class="bi bi-activity"></i> Activity Monitor
+                </a>
+                <div class="nav-label">Accounts</div>
+                <a href="{% url 'admin_user_list' %}" class="nav-item {% if current == 'admin_user_list' %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i> Accounts
+                </a>
+                <a href="{% url 'admin_add_user' %}" class="nav-item {% if current == 'admin_add_user' %}active{% endif %}">
+                    <i class="bi bi-person-plus-fill"></i> Create Account
+                </a>
+
             {% elif user.userprofile.role == 'student' %}
                 <div class="nav-label">Main</div>
-                <a href="{% url 'student_dashboard' %}" class="nav-item {% if current == 'student_dashboard' %}active{% endif %}"><i class="bi bi-grid-fill"></i> Dashboard</a>
-                <a href="{% url 'student_tasks' %}" class="nav-item {% if current == 'student_tasks' %}active{% endif %}"><i class="bi bi-card-checklist"></i> My Tasks</a>
-                <a href="{% url 'student_profile' %}" class="nav-item {% if current == 'student_profile' %}active{% endif %}"><i class="bi bi-person-circle"></i> Profile</a>
-            {% else %}
+                <a href="{% url 'student_dashboard' %}" class="nav-item {% if current == 'student_dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-fill"></i> Dashboard
+                </a>
+                <div class="nav-label">My Learning</div>
+                <a href="{% url 'student_profile' %}" class="nav-item {% if current == 'student_profile' %}active{% endif %}">
+                    <i class="bi bi-person-circle"></i> My Profile
+                </a>
+                <a href="{% url 'student_tasks' %}" class="nav-item {% if current == 'student_tasks' %}active{% endif %}">
+                    <i class="bi bi-card-checklist"></i> Task Wall
+                </a>
+                {% with student_subjects=request.user.student.subjects.all %}
+                    {% if student_subjects %}
+                    <div class="nav-label">Subjects</div>
+                    {% for subj in student_subjects %}
+                    <a href="{% url 'student_subject_detail' subj.id %}"
+                       class="nav-item {% if current == 'student_subject_detail' and request.resolver_match.kwargs.id == subj.id %}active{% endif %}">
+                        <span style="font-size:.9rem;">{{ subj.icon }}</span> {{ subj.name }}
+                    </a>
+                    {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+            {% else %} {# teacher #}
                 <div class="nav-label">Main</div>
-                <a href="{% url 'dashboard' %}" class="nav-item {% if current == 'dashboard' %}active{% endif %}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+                <a href="{% url 'dashboard' %}" class="nav-item {% if current == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-fill"></i> Dashboard
+                </a>
                 <div class="nav-label">Management</div>
-                <a href="{% url 'student_list' %}" class="nav-item {% if current == 'student_list' or current == 'student_detail' or current == 'edit_student' %}active{% endif %}"><i class="bi bi-people-fill"></i> Students</a>
-                <a href="{% url 'add_student' %}" class="nav-item {% if current == 'add_student' %}active{% endif %}"><i class="bi bi-person-plus-fill"></i> Add Student</a>
-                <a href="{% url 'teacher_feedback' %}" class="nav-item {% if current == 'teacher_feedback' %}active{% endif %}"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
+                <a href="{% url 'student_list' %}" class="nav-item {% if current == 'student_list' or current == 'student_detail' or current == 'edit_student' %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i> Students
+                </a>
+                <a href="{% url 'add_student' %}" class="nav-item {% if current == 'add_student' %}active{% endif %}">
+                    <i class="bi bi-person-plus-fill"></i> Add Student
+                </a>
+                <a href="{% url 'subject_list' %}" class="nav-item {% if current == 'subject_list' or current == 'add_subject' or current == 'edit_subject' %}active{% endif %}">
+                    <i class="bi bi-journal-bookmark-fill"></i> Subjects
+                </a>
+                <a href="{% url 'teacher_feedback' %}" class="nav-item {% if current == 'teacher_feedback' %}active{% endif %}">
+                    <i class="bi bi-chat-quote-fill"></i> Teacher Feedback
+                </a>
                 <div class="nav-label">Tasks</div>
-                <a href="{% url 'assign_task' %}" class="nav-item {% if current == 'assign_task' %}active{% endif %}"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
-                <a href="{% url 'task_history' %}" class="nav-item {% if current == 'task_history' %}active{% endif %}"><i class="bi bi-journal-text"></i> Task History &amp; Evaluation</a>
+                <a href="{% url 'assign_task' %}" class="nav-item {% if current == 'assign_task' %}active{% endif %}">
+                    <i class="bi bi-clipboard-plus-fill"></i> Assign Task
+                </a>
+                <a href="{% url 'task_history' %}" class="nav-item {% if current == 'task_history' %}active{% endif %}">
+                    <i class="bi bi-journal-text"></i> Task History &amp; Evaluation
+                </a>
                 <div class="nav-label">Monitoring</div>
-                <a href="{% url 'student_monitoring' %}" class="nav-item {% if current == 'student_monitoring' %}active{% endif %}"><i class="bi bi-activity"></i> Activity Monitor</a>
+                <a href="{% url 'student_monitoring' %}" class="nav-item {% if current == 'student_monitoring' %}active{% endif %}">
+                    <i class="bi bi-activity"></i> Activity Monitor
+                </a>
             {% endif %}
+
         {% endwith %}
     </nav>
     <div class="sidebar-footer">
@@ -96,10 +157,16 @@
             <div class="user-avatar">{{ user.username|first|upper }}</div>
             <div>
                 <div class="user-name">{{ user.username }}</div>
-                <div class="user-role">{{ user.userprofile.role|capfirst }}</div>
+                <div class="user-role">
+                    {% if user.userprofile.role == 'teacher' %}SPED Teacher
+                    {% elif user.userprofile.role == 'admin' %}Administrator
+                    {% else %}Student{% endif %}
+                </div>
             </div>
         </div>
-        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+        <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn">
+            <i class="bi bi-box-arrow-left"></i> Sign Out
+        </a>
     </div>
 </aside>
 
@@ -111,7 +178,8 @@
         {% if messages %}
         <div style="margin-bottom:16px;">
             {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert" style="font-size:.83rem;border-radius:10px;">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show"
+                 role="alert" style="font-size:.83rem;border-radius:10px;">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -123,14 +191,23 @@
     </div>
 </main>
 
+<!-- Logout Modal -->
 <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:white;border-radius:16px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
-        <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;"><i class="bi bi-box-arrow-left"></i></div>
+        <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.4rem;">
+            <i class="bi bi-box-arrow-left"></i>
+        </div>
         <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Sign Out?</h5>
         <p style="font-size:.83rem;color:#64748b;margin:0 0 24px;">Are you sure you want to sign out of Inclusive Classroom?</p>
         <div style="display:flex;gap:10px;justify-content:center;">
-            <button onclick="document.getElementById('logoutModal').style.display='none'" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">Cancel</button>
-            <a href="{% url 'logout' %}" style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">Yes, Sign Out</a>
+            <button onclick="document.getElementById('logoutModal').style.display='none'"
+                    style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:#64748b;cursor:pointer;">
+                Cancel
+            </button>
+            <a href="{% url 'logout' %}"
+               style="flex:1;padding:10px;border:none;border-radius:9px;background:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;color:white;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                Yes, Sign Out
+            </a>
         </div>
     </div>
 </div>

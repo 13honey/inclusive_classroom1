@@ -1,0 +1,123 @@
+{% extends 'classroom/base.html' %}
+{% block title %}Subjects | Inclusive Classroom{% endblock %}
+{% block page_title %}Subjects{% endblock %}
+
+{% block extra_css %}
+<style>
+    .subjects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:20px;}
+    .subject-card{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;transition:all .2s;}
+    .subject-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.08);transform:translateY(-2px);}
+    .subject-card-top{padding:20px;display:flex;align-items:center;gap:14px;}
+    .subject-icon-wrap{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+    .subject-name{font-size:.95rem;font-weight:800;color:var(--text);}
+    .subject-desc{font-size:.75rem;color:var(--text-muted);margin-top:3px;line-height:1.5;}
+    .subject-students{padding:12px 20px;border-top:1px solid var(--border);background:#f8fafc;}
+    .student-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+    .student-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:white;border:1px solid var(--border);font-size:.7rem;font-weight:700;color:var(--text);}
+    .subject-actions{padding:10px 20px;border-top:1px solid var(--border);display:flex;gap:8px;}
+    .act-btn{flex:1;padding:7px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;color:var(--text-muted);transition:all .15s;}
+    .act-btn.edit:hover{border-color:#fde68a;background:#fffbeb;color:#d97706;}
+    .act-btn.del:hover{border-color:#fecaca;background:#fef2f2;color:var(--danger);}
+    .empty-state{text-align:center;padding:60px 24px;color:var(--text-muted);}
+    .empty-state i{font-size:3rem;opacity:.15;display:block;margin-bottom:12px;}
+    .empty-state h3{font-size:1rem;font-weight:800;margin-bottom:6px;color:var(--text);}
+    .empty-state p{font-size:.82rem;margin-bottom:20px;}
+    .btn-add{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:.83rem;text-decoration:none;transition:background .15s;}
+    .btn-add:hover{background:var(--primary-dark);color:white;}
+    .modal-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+    .modal-overlay.show{display:flex;}
+    .modal-box{background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+    .modal-title{font-size:.95rem;font-weight:800;text-align:center;margin-bottom:5px;}
+    .modal-msg{font-size:.8rem;color:var(--text-muted);text-align:center;margin-bottom:20px;line-height:1.6;}
+    .modal-actions{display:flex;gap:10px;}
+    .modal-cancel{flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);}
+    .modal-confirm-danger{flex:1;padding:9px;border-radius:8px;border:none;background:var(--danger);color:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <h4 class="fw-bold mb-0">Subjects</h4>
+    <a href="{% url 'add_subject' %}" class="btn-add">
+        <i class="bi bi-plus-lg"></i> Add Subject
+    </a>
+</div>
+
+{% if subjects %}
+<div class="subjects-grid">
+    {% for subject in subjects %}
+    <div class="subject-card">
+        <div class="subject-card-top">
+            <div class="subject-icon-wrap" style="background:{{ subject.color }}22;">
+                {{ subject.icon }}
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div class="subject-name">{{ subject.name }}</div>
+                {% if subject.description %}
+                <div class="subject-desc">{{ subject.description }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="subject-students">
+            <div style="font-size:.68rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
+                {{ subject.students.count }} Learner{{ subject.students.count|pluralize }}
+            </div>
+            <div class="student-chips">
+                {% for s in subject.students.all %}
+                <span class="student-chip">{{ s.name }}</span>
+                {% empty %}
+                <span style="font-size:.72rem;color:var(--text-muted);font-style:italic;">No learners enrolled yet</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="subject-actions">
+            <a href="{% url 'edit_subject' subject.id %}" class="act-btn edit">
+                <i class="bi bi-pencil-fill"></i> Edit
+            </a>
+            <button type="button" class="act-btn del"
+                    onclick="openDeleteModal('{% url 'delete_subject' subject.id %}', '{{ subject.name|escapejs }}')">
+                <i class="bi bi-trash-fill"></i> Delete
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-journal-bookmark"></i>
+    <h3>No Subjects Yet</h3>
+    <p>Add learning domains or subject areas for your SPED learners.</p>
+    <a href="{% url 'add_subject' %}" class="btn-add">
+        <i class="bi bi-plus-lg"></i> Add First Subject
+    </a>
+</div>
+{% endif %}
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem;">🗑️</div>
+        <div class="modal-title">Delete Subject?</div>
+        <div class="modal-msg" id="deleteMsg">This cannot be undone.</div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <form id="deleteForm" method="POST" style="flex:1;">
+                {% csrf_token %}
+                <button type="submit" class="modal-confirm-danger" style="width:100%;">Yes, Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openDeleteModal(url, name) {
+    document.getElementById('deleteMsg').textContent = 'Are you sure you want to delete "' + name + '"? Tasks tagged under this subject will not be deleted.';
+    document.getElementById('deleteForm').action = url;
+    document.getElementById('deleteModal').classList.add('show');
+}
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+document.getElementById('deleteModal').addEventListener('click', function(e){ if(e.target===this) closeDeleteModal(); });
+</script>
+{% endblock %}

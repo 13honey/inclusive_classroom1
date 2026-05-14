@@ -1,0 +1,178 @@
+{% extends 'classroom/base.html' %}
+
+{% block page_title %}Add Subject{% endblock %}
+
+{% block extra_css %}
+<style>
+  .subject-page-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .subject-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;color:var(--text-muted);background:white;text-decoration:none;font-weight:700;font-size:.82rem;}
+  .subject-back:hover{border-color:var(--primary);color:var(--primary);}
+  .subject-title{font-size:1.3rem;font-weight:800;margin:0;}
+  .subject-form-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;max-width:1040px;box-shadow:0 12px 32px rgba(15,23,42,.06);}
+  .subject-form{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);}
+  .subject-panel{padding:24px;}
+  .subject-panel + .subject-panel{border-left:1px solid var(--border);background:#f8fafc;}
+  .panel-kicker{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:5px;}
+  .panel-title{display:flex;align-items:center;gap:8px;font-size:.98rem;font-weight:800;margin-bottom:18px;color:var(--text);}
+  .panel-title i{color:var(--primary);}
+  .form-label{font-size:.78rem;font-weight:800;color:var(--text);margin-bottom:7px;}
+  .form-control{padding:10px 12px;font-size:.88rem;font-weight:600;background:white;}
+  textarea.form-control{min-height:116px;resize:vertical;}
+  .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .color-input{height:42px;padding:5px;}
+  .icon-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;}
+  .icon-choice{display:flex;align-items:center;gap:7px;padding:9px 10px;border:1.5px solid var(--border);border-radius:10px;background:white;color:var(--text);font-size:.76rem;font-weight:800;cursor:pointer;text-align:left;transition:border-color .15s,background .15s,color .15s;}
+  .icon-choice:hover{border-color:#bfdbfe;background:var(--primary-light);color:var(--primary);}
+  .icon-choice.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
+  .icon-choice .icon-symbol{width:22px;height:22px;border-radius:7px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+  .icon-help{font-size:.68rem;color:var(--text-muted);font-weight:700;margin-top:5px;}
+  .student-box{border:1.5px solid var(--border);border-radius:12px;background:white;overflow:hidden;}
+  .student-box-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);font-size:.78rem;font-weight:800;color:var(--text-muted);}
+  .select-all-btn{border:1.5px solid var(--border);border-radius:7px;background:white;color:var(--primary);font-size:.72rem;font-weight:800;padding:5px 10px;cursor:pointer;white-space:nowrap;}
+  .select-all-btn:hover{border-color:var(--primary);background:var(--primary-light);}
+  .student-list{max-height:300px;overflow-y:auto;padding:8px;}
+  .student-option{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:9px;margin-bottom:4px;cursor:pointer;transition:background .15s;}
+  .student-option:hover{background:var(--primary-light);}
+  .student-option input{width:16px;height:16px;accent-color:var(--primary);flex-shrink:0;}
+  .student-name{font-size:.86rem;font-weight:700;color:var(--text);}
+  .empty-students{padding:28px 16px;text-align:center;color:var(--text-muted);font-size:.82rem;font-weight:700;}
+  .form-actions{display:flex;align-items:center;gap:10px;padding:18px 24px;border-top:1px solid var(--border);background:white;}
+  .btn-create{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:9px;font-weight:800;}
+  .btn-cancel{padding:10px 16px;border-radius:9px;font-weight:800;}
+  @media(max-width:900px){
+    .subject-form{grid-template-columns:1fr;}
+    .subject-panel + .subject-panel{border-left:0;border-top:1px solid var(--border);}
+    .student-list{max-height:240px;}
+  }
+  @media(max-width:560px){
+    .subject-panel{padding:18px;}
+    .meta-grid{grid-template-columns:1fr;}
+    .icon-picker{grid-template-columns:1fr 1fr;}
+    .form-actions{padding:16px 18px;flex-direction:column;align-items:stretch;}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="subject-page-head">
+  <a href="{% url 'subject_list' %}" class="subject-back"><i class="bi bi-arrow-left"></i> Back</a>
+  <h1 class="subject-title">Add Subject</h1>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-danger alert-dismissible fade show">
+      {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="subject-form-card">
+  <form method="post">
+    {% csrf_token %}
+    <div class="subject-form">
+      <section class="subject-panel">
+        <div class="panel-kicker">Subject Details</div>
+        <div class="panel-title"><i class="bi bi-journal-bookmark-fill"></i> Learning Area</div>
+
+        <div class="mb-3">
+          <label class="form-label">Subject Name *</label>
+          <input type="text" name="name" class="form-control" placeholder="e.g. Communication Skills" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="4" placeholder="Brief description of this subject area..."></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Icon</label>
+          <div class="icon-picker" aria-label="Subject icon choices">
+            <button type="button" class="icon-choice active" data-icon="💬"><span class="icon-symbol">💬</span> Communication</button>
+            <button type="button" class="icon-choice" data-icon="✋"><span class="icon-symbol">✋</span> Motor</button>
+            <button type="button" class="icon-choice" data-icon="🧠"><span class="icon-symbol">🧠</span> Cognitive</button>
+            <button type="button" class="icon-choice" data-icon="🤝"><span class="icon-symbol">🤝</span> Social</button>
+            <button type="button" class="icon-choice" data-icon="⭐"><span class="icon-symbol">⭐</span> Self-Care</button>
+            <button type="button" class="icon-choice" data-icon="📚"><span class="icon-symbol">📚</span> Academic</button>
+          </div>
+          <input type="text" name="icon" id="iconInput" class="form-control" value="💬" maxlength="10">
+          <div class="icon-help">Choose a suggestion or type your own icon.</div>
+        </div>
+
+        <div class="meta-grid">
+          <div>
+            <label class="form-label">Color</label>
+            <input type="color" name="color" class="form-control form-control-color w-100 color-input" value="#2563eb">
+          </div>
+        </div>
+      </section>
+
+      <section class="subject-panel">
+        <div class="panel-kicker">Enrollment</div>
+        <div class="panel-title"><i class="bi bi-people-fill"></i> Enroll Students</div>
+
+        <div class="student-box">
+          <div class="student-box-head">
+            <span>Available students · {{ students|length }} total</span>
+            {% if students %}
+            <button type="button" class="select-all-btn" id="selectAllStudents">Select All</button>
+            {% endif %}
+          </div>
+          {% if students %}
+          <div class="student-list">
+            {% for student in students %}
+            <label class="student-option" for="s{{ student.id }}">
+              <input class="form-check-input" type="checkbox" name="student_ids" value="{{ student.id }}" id="s{{ student.id }}">
+              <span class="student-name">{{ student.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-students">No students yet.</div>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-create"><i class="bi bi-plus-lg"></i> Create Subject</button>
+      <a href="{% url 'subject_list' %}" class="btn btn-outline-secondary btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.icon-choice').forEach(function(button) {
+  button.addEventListener('click', function() {
+    document.querySelectorAll('.icon-choice').forEach(function(choice) {
+      choice.classList.remove('active');
+    });
+    button.classList.add('active');
+    document.getElementById('iconInput').value = button.dataset.icon;
+  });
+});
+
+const iconInput = document.getElementById('iconInput');
+if (iconInput) {
+  iconInput.addEventListener('input', function() {
+    document.querySelectorAll('.icon-choice').forEach(function(choice) {
+      choice.classList.toggle('active', choice.dataset.icon === iconInput.value.trim());
+    });
+  });
+}
+
+const selectAllBtn = document.getElementById('selectAllStudents');
+if (selectAllBtn) {
+  selectAllBtn.addEventListener('click', function() {
+    const boxes = Array.from(document.querySelectorAll('input[name="student_ids"]'));
+    const shouldSelect = boxes.some(function(box) { return !box.checked; });
+    boxes.forEach(function(box) {
+      box.checked = shouldSelect;
+    });
+    selectAllBtn.textContent = shouldSelect ? 'Clear All' : 'Select All';
+  });
+}
+</script>
+{% endblock %}

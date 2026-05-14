@@ -1,0 +1,80 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+    #content { max-width: none; }
+    #content-main { width: min(100%, 1120px); }
+    .media-summary { margin: 0 0 14px; color: var(--body-quiet-color); }
+    .media-module { margin: 0 0 18px; }
+    .media-module table { width: 100%; }
+    .media-module caption {
+        background: var(--primary);
+        color: var(--header-link-color);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        padding: 8px 10px;
+    }
+    .media-module th,
+    .media-module td {
+        padding: 7px 10px;
+        vertical-align: middle;
+    }
+    .media-module .file-name { width: 58%; }
+    .media-module .file-size { width: 14%; white-space: nowrap; }
+    .media-module .file-action { width: 12%; white-space: nowrap; text-align: right; }
+    .media-count { color: var(--body-quiet-color); font-weight: 500; text-transform: none; letter-spacing: 0; }
+    .media-empty { padding: 16px; background: var(--darkened-bg); border-radius: 4px; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; Media Library
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <p class="media-summary">
+        Files uploaded through student profiles, task attachments, videos, and recordings.
+    </p>
+
+    {% if media_groups %}
+        {% for group in media_groups %}
+            <div class="module media-module">
+                <table>
+                    <caption>
+                        {{ group.folder }}
+                        <span class="media-count">({{ group.files|length }} file{% if group.files|length != 1 %}s{% endif %})</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="file-name">File</th>
+                            <th scope="col" class="file-size">Size</th>
+                            <th scope="col" class="file-action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in group.files %}
+                            <tr class="{% cycle 'row1' 'row2' %}">
+                                <th scope="row" class="file-name">
+                                    <a href="{{ file.url }}" target="_blank" rel="noopener">{{ file.name }}</a>
+                                </th>
+                                <td class="file-size">{{ file.size|filesizeformat }}</td>
+                                <td class="file-action">
+                                    <a class="button" href="{{ file.url }}" target="_blank" rel="noopener">Open</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="media-empty">No media files found yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

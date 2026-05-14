@@ -38,7 +38,8 @@
         .main{margin-left:var(--sidebar-w);min-height:100vh;padding-bottom:80px;}
         .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
         .topbar-title{font-size:1rem;font-weight:800;}
-        .topbar-chip{display:flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;margin-left:auto;}
+        .topbar-chip{display:flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border:0;border-radius:20px;padding:4px 12px;font-family:inherit;font-size:.75rem;font-weight:700;margin-left:auto;cursor:pointer;transition:all .15s;}
+        .topbar-chip:hover{background:#dbeafe;color:var(--primary-dark);}
         .page-content{padding:20px 26px;}
         .alert-success-custom{display:flex;align-items:center;gap:8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:9px;padding:11px 14px;font-size:.83rem;font-weight:700;color:#065f46;margin-bottom:14px;}
         .alert-danger-custom{display:flex;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:11px 14px;font-size:.83rem;font-weight:700;color:#991b1b;margin-bottom:14px;}
@@ -63,7 +64,7 @@
         .student-option{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;background:white;}
         .student-option:hover{border-color:#bfdbfe;background:var(--primary-light);}
         .student-option.selected{border-color:var(--primary);background:var(--primary-light);}
-        .student-option input[type=radio]{accent-color:var(--primary);flex-shrink:0;}
+        .student-option input[type=checkbox]{accent-color:var(--primary);flex-shrink:0;width:15px;height:15px;}
         .so-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;overflow:hidden;}
         .so-avatar img{width:100%;height:100%;object-fit:cover;}
         .so-name{font-size:.82rem;font-weight:700;color:var(--text);}
@@ -72,11 +73,12 @@
         .badge{padding:2px 8px;border-radius:20px;font-size:.61rem;font-weight:700;white-space:nowrap;}
         .badge-blue{background:var(--primary-light);color:var(--primary);}
         .badge-purple{background:var(--purple-light);color:var(--purple);}
-        .preview-pill{display:none;align-items:center;gap:8px;background:var(--primary-light);border:1.5px solid #bfdbfe;border-radius:9px;padding:8px 13px;margin-bottom:14px;}
+        .select-all-btn{margin-left:auto;padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:white;font-size:.72rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .15s;white-space:nowrap;}
+        .select-all-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+        .preview-pill{display:none;align-items:center;gap:8px;background:var(--primary-light);border:1.5px solid #bfdbfe;border-radius:9px;padding:10px 13px;margin-bottom:14px;flex-wrap:wrap;}
         .preview-pill.show{display:flex;}
-        .preview-pill-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem;flex-shrink:0;}
-        .preview-pill-name{font-size:.8rem;font-weight:700;color:var(--primary);}
-        .preview-pill-sub{font-size:.67rem;color:var(--text-muted);}
+        .preview-pill-name{font-size:.8rem;font-weight:700;color:var(--primary);flex:1;}
+        .preview-pill-sub{font-size:.67rem;color:var(--text-muted);width:100%;}
         .feedback-list{padding:10px 12px;}
         .feedback-card{padding:13px 14px;background:#f8fafc;border:1px solid #eef2f7;border-left:4px solid var(--primary);border-radius:10px;margin-bottom:9px;}
         .feedback-card:last-child{margin-bottom:0;}
@@ -86,6 +88,21 @@
         .empty-state{padding:28px 16px;text-align:center;color:var(--text-muted);}
         .empty-state i{font-size:2rem;opacity:.2;display:block;margin-bottom:8px;}
         .empty-state p{font-size:.82rem;font-weight:600;margin:0;}
+        .notes-modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9998;align-items:center;justify-content:center;padding:20px;}
+        .notes-modal.show{display:flex;}
+        .notes-panel{width:min(760px,100%);max-height:82vh;background:white;border-radius:14px;box-shadow:0 24px 70px rgba(15,23,42,.25);overflow:hidden;display:flex;flex-direction:column;}
+        .notes-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+        .notes-head-icon{width:34px;height:34px;border-radius:9px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .notes-title{font-size:.95rem;font-weight:800;}
+        .notes-sub{font-size:.72rem;color:var(--text-muted);margin-top:1px;}
+        .notes-close{margin-left:auto;border:0;background:#f8fafc;color:var(--text-muted);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+        .notes-close:hover{background:#fef2f2;color:var(--danger);}
+        .notes-body{padding:14px 16px;overflow-y:auto;}
+        .notes-card{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:10px;padding:12px 13px;margin-bottom:10px;background:#f8fafc;}
+        .notes-card:last-child{margin-bottom:0;}
+        .notes-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:.7rem;font-weight:800;color:var(--text-muted);margin-bottom:7px;}
+        .notes-observation{font-size:.83rem;font-weight:600;color:var(--text);line-height:1.55;}
+        .notes-recommendation{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--primary-light);color:var(--primary);font-size:.76rem;font-weight:700;line-height:1.45;}
         .sticky-bar{position:fixed;bottom:0;left:var(--sidebar-w);right:0;background:white;border-top:1px solid var(--border);padding:11px 26px;display:flex;align-items:center;justify-content:flex-end;gap:10px;z-index:50;box-shadow:0 -4px 16px rgba(0,0,0,.06);}
         .btn-cancel-bar{padding:8px 18px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;color:var(--text-muted);transition:all .15s;display:inline-flex;align-items:center;gap:5px;text-decoration:none;}
         .btn-cancel-bar:hover{background:#fef2f2;border-color:var(--danger);color:var(--danger);}
@@ -101,6 +118,7 @@
     </style>
 </head>
 <body>
+
 <aside class="sidebar">
     <div class="sidebar-logo">
         <div class="logo-icon">IC</div>
@@ -115,6 +133,7 @@
         <div class="nav-label">Management</div>
         <a href="{% url 'student_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> Students</a>
         <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'subject_list' %}" class="nav-item"><i class="bi bi-journal-bookmark-fill"></i> Subjects</a>
         <a href="{% url 'teacher_feedback' %}" class="nav-item active"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
         <div class="nav-label">Tasks</div>
         <a href="{% url 'assign_task' %}" class="nav-item"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
@@ -125,7 +144,7 @@
     <div class="sidebar-footer">
         <div class="user-chip">
             <div class="user-avatar">{{ user.username|first|upper }}</div>
-            <div><div class="user-name">{{ user.username }}</div><div class="user-role">Teacher</div></div>
+            <div><div class="user-name">{{ user.username }}</div><div class="user-role">SPED Teacher</div></div>
         </div>
         <a href="#" onclick="document.getElementById('logoutModal').style.display='flex'" class="logout-btn"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
     </div>
@@ -134,7 +153,9 @@
 <main class="main">
     <div class="topbar">
         <div class="topbar-title">Teacher Feedback</div>
-        <div class="topbar-chip"><i class="bi bi-chat-quote-fill"></i> Student Notes</div>
+        <button type="button" class="topbar-chip" onclick="openNotesModal()">
+            <i class="bi bi-chat-quote-fill"></i> Student Notes
+        </button>
     </div>
     <div class="page-content">
         {% if messages %}
@@ -155,15 +176,20 @@
                         <div class="section-head">
                             <div class="section-icon si-blue"><i class="bi bi-people-fill"></i></div>
                             <div>
-                                <div class="section-title">Select Student</div>
-                                <div class="section-sub">Who is this feedback for?</div>
+                                <div class="section-title">Select Students</div>
+                                <div class="section-sub">Pick one or more students</div>
                             </div>
+                            <button type="button" class="select-all-btn" id="selectAllBtn" onclick="toggleSelectAll()">
+                                Select All
+                            </button>
                         </div>
                         {% if students %}
                         <div class="student-picker" id="studentPicker">
                             {% for student in students %}
-                            <label class="student-option" id="opt-{{ student.id }}" onclick="selectStudent('{{ student.id }}', '{{ student.name|escapejs }}')">
-                                <input type="radio" name="student_id" value="{{ student.id }}" {% if selected_student and selected_student.id == student.id %}checked{% endif %} required>
+                            <label class="student-option" id="opt-{{ student.id }}">
+                                <input type="checkbox" name="student_id" value="{{ student.id }}"
+                                       {% if selected_student and selected_student.id == student.id %}checked{% endif %}
+                                       onchange="onStudentChange(this)">
                                 <div class="so-avatar">
                                     {% if student.profile_picture %}<img src="{{ student.profile_picture.url }}" alt="{{ student.name }}">{% else %}{{ student.name|first|upper }}{% endif %}
                                 </div>
@@ -185,12 +211,9 @@
 
                 <div>
                     <div class="preview-pill" id="selectedPill">
-                        <div class="preview-pill-avatar" id="pillAvatar">?</div>
-                        <div>
-                            <div class="preview-pill-name" id="pillName">No student selected</div>
-                            <div class="preview-pill-sub">Feedback will appear on this student's profile</div>
-                        </div>
-                        <i class="bi bi-check-circle-fill" style="margin-left:auto;color:var(--primary);font-size:1rem;"></i>
+                        <i class="bi bi-check-circle-fill" style="color:var(--primary);font-size:1rem;flex-shrink:0;"></i>
+                        <div class="preview-pill-name" id="pillName"></div>
+                        <div class="preview-pill-sub">Feedback will appear on these students' profiles</div>
                     </div>
 
                     <div class="section-card">
@@ -256,6 +279,45 @@
     </button>
 </div>
 
+<div id="notesModal" class="notes-modal" role="dialog" aria-modal="true" aria-labelledby="notesTitle">
+    <div class="notes-panel">
+        <div class="notes-head">
+            <div class="notes-head-icon"><i class="bi bi-chat-quote-fill"></i></div>
+            <div>
+                <div class="notes-title" id="notesTitle">Student Notes</div>
+                <div class="notes-sub">Recent feedback saved for your students</div>
+            </div>
+            <button type="button" class="notes-close" onclick="closeNotesModal()" aria-label="Close student notes">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="notes-body">
+            {% if feedbacks %}
+                {% for fb in feedbacks %}
+                <div class="notes-card">
+                    <div class="notes-meta">
+                        <i class="bi bi-person-fill"></i> {{ fb.student.name }}
+                        <span>&middot;</span>
+                        <i class="bi bi-calendar3"></i> {{ fb.date|date:"M d, Y" }}
+                    </div>
+                    <div class="notes-observation">{{ fb.observation }}</div>
+                    {% if fb.recommendation %}
+                    <div class="notes-recommendation">
+                        <i class="bi bi-lightbulb-fill me-1"></i>{{ fb.recommendation }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-chat-dots"></i>
+                    <p>No student notes yet. Save feedback first, then it will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:white;border-radius:14px;padding:26px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;">
         <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:5px;">Sign Out?</div>
@@ -266,57 +328,100 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function selectStudent(id, name) {
-    document.querySelectorAll('.student-option').forEach(el => el.classList.remove('selected'));
-    const opt = document.getElementById('opt-' + id);
-    if (opt) opt.classList.add('selected');
-    document.getElementById('pillAvatar').textContent = name.charAt(0).toUpperCase();
-    document.getElementById('pillName').textContent = name;
-    document.getElementById('selectedPill').classList.add('show');
-}
+    function getChecked() {
+        return [...document.querySelectorAll('input[name="student_id"]:checked')];
+    }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const checked = document.querySelector('input[name="student_id"]:checked');
-    if (checked) {
-        const label = checked.closest('.student-option');
-        if (label) {
-            label.classList.add('selected');
-            const nameEl = label.querySelector('.so-name');
-            if (nameEl) {
-                document.getElementById('pillAvatar').textContent = nameEl.textContent.trim().charAt(0).toUpperCase();
-                document.getElementById('pillName').textContent = nameEl.textContent.trim();
-                document.getElementById('selectedPill').classList.add('show');
-            }
+    function onStudentChange(cb) {
+        cb.closest('.student-option').classList.toggle('selected', cb.checked);
+        updatePill();
+        updateSelectAllBtn();
+    }
+
+    function updatePill() {
+        const checked = getChecked();
+        const pill = document.getElementById('selectedPill');
+        const nameEl = document.getElementById('pillName');
+        if (checked.length === 0) {
+            pill.classList.remove('show');
+        } else {
+            const names = checked.map(cb => cb.closest('.student-option').querySelector('.so-name').textContent.trim());
+            nameEl.textContent = names.join(', ');
+            pill.classList.add('show');
         }
     }
-});
 
-function submitFeedback() {
-    const studentPicked = document.querySelector('input[name="student_id"]:checked');
-    const observation = document.getElementById('observationInput').value.trim();
-    if (!studentPicked) {
-        alert('Please select a student first.');
-        document.getElementById('studentPicker')?.scrollIntoView({behavior:'smooth', block:'center'});
-        return;
+    function toggleSelectAll() {
+        const checkboxes = document.querySelectorAll('input[name="student_id"]');
+        const allChecked = [...checkboxes].every(cb => cb.checked);
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+            cb.closest('.student-option').classList.toggle('selected', !allChecked);
+        });
+        updatePill();
+        updateSelectAllBtn();
     }
-    if (!observation) {
-        alert('Please write an observation.');
-        document.getElementById('observationInput').focus();
-        return;
-    }
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    document.getElementById('saveSpinner').classList.add('show');
-    document.getElementById('saveIcon').style.display = 'none';
-    document.getElementById('saveTxt').textContent = 'Saving...';
-    document.getElementById('feedbackForm').submit();
-}
 
-document.getElementById('logoutModal').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-});
+    function updateSelectAllBtn() {
+        const checkboxes = document.querySelectorAll('input[name="student_id"]');
+        const allChecked = checkboxes.length > 0 && [...checkboxes].every(cb => cb.checked);
+        document.getElementById('selectAllBtn').textContent = allChecked ? 'Deselect All' : 'Select All';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input[name="student_id"]:checked').forEach(cb => {
+            cb.closest('.student-option').classList.add('selected');
+        });
+        updatePill();
+        updateSelectAllBtn();
+    });
+
+    function submitFeedback() {
+        const checked = getChecked();
+        const observation = document.getElementById('observationInput').value.trim();
+        if (checked.length === 0) {
+            alert('Please select at least one student first.');
+            document.getElementById('studentPicker')?.scrollIntoView({behavior:'smooth', block:'center'});
+            return;
+        }
+        if (!observation) {
+            alert('Please write an observation.');
+            document.getElementById('observationInput').focus();
+            return;
+        }
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        document.getElementById('saveSpinner').classList.add('show');
+        document.getElementById('saveIcon').style.display = 'none';
+        document.getElementById('saveTxt').textContent = 'Saving...';
+        document.getElementById('feedbackForm').submit();
+    }
+
+    function openNotesModal() {
+        document.getElementById('notesModal').classList.add('show');
+    }
+
+    function closeNotesModal() {
+        document.getElementById('notesModal').classList.remove('show');
+    }
+
+    document.getElementById('notesModal').addEventListener('click', function(e) {
+        if (e.target === this) closeNotesModal();
+    });
+
+    document.getElementById('logoutModal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeNotesModal();
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+    });
 </script>
 </body>
 </html>
