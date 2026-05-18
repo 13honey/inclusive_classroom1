@@ -40,11 +40,11 @@
         .logout-btn:hover{color:#ef4444;background:rgba(239,68,68,.07);}
 
         /* ── Main ── */
-        .main{margin-left:var(--sidebar-w);min-height:100vh;}
+        .main{margin-left:var(--sidebar-w);width:calc(100% - var(--sidebar-w));min-height:100vh;overflow-x:hidden;}
         .topbar{background:white;border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
         .topbar-title{font-size:1rem;font-weight:800;}
         .topbar-count{margin-left:auto;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.75rem;font-weight:700;}
-        .page-content{padding:22px 26px;}
+        .page-content{padding:22px 26px;max-width:100%;overflow:hidden;}
 
         /* ── Stat Cards ── */
         .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
@@ -106,6 +106,12 @@
         .table-head-title{font-size:.85rem;font-weight:800;}
         .table-head-count{margin-left:auto;font-size:.72rem;color:var(--text-muted);font-weight:700;}
 
+        .table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+        .table-scroll table{width:100%;min-width:1040px;border-collapse:collapse;}
+        .table-scroll th:last-child,.table-scroll td:last-child{position:sticky;right:0;background:white;z-index:2;box-shadow:-10px 0 16px rgba(15,23,42,.08);}
+        .table-scroll thead th:last-child{background:#f8fafc;z-index:3;}
+        .table-scroll th:nth-child(9),.table-scroll td:nth-child(9){min-width:108px;}
+        .table-scroll th:last-child,.table-scroll td:last-child{min-width:180px;}
         table{width:100%;border-collapse:collapse;}
         thead th{padding:10px 16px;background:#f8fafc;font-size:.65rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
         tbody tr{border-bottom:1px solid #f1f5f9;transition:background .12s;}
@@ -115,15 +121,23 @@
 
         /* ── Student Cell ── */
         .student-cell{display:flex;align-items:center;gap:9px;}
-        .s-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0;overflow:hidden;}
+        .s-avatar{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.3px;flex-shrink:0;overflow:hidden;box-shadow:0 8px 18px rgba(37,99,235,.16);}
         .s-avatar img{width:100%;height:100%;object-fit:cover;}
-        .s-name{font-weight:700;color:var(--text);white-space:nowrap;max-width:112px;overflow:hidden;text-overflow:ellipsis;}
+        .s-name{font-weight:800;color:var(--text);white-space:nowrap;letter-spacing:.4px;}
         .s-link{font-size:.7rem;color:var(--primary);text-decoration:none;font-weight:600;}
         .s-link:hover{text-decoration:underline;}
 
         /* ── Task cell ── */
         .task-title-cell{font-weight:700;color:var(--text);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .task-desc-cell{font-size:.7rem;color:var(--text-muted);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .subject-cell{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;color:var(--primary);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;background:var(--primary-light);border-radius:999px;padding:4px 9px;}
+        .task-main-cell{display:flex;align-items:center;gap:12px;min-width:0;}
+        .student-initials{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.78rem;letter-spacing:.3px;flex-shrink:0;box-shadow:0 8px 18px rgba(37,99,235,.18);}
+        .task-main-cell .task-title-cell{max-width:260px;font-weight:800;}
+        .task-meta-line{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;}
+        .subject-pill{display:inline-flex;align-items:center;gap:5px;max-width:180px;border-radius:999px;padding:3px 8px;background:var(--primary-light);color:var(--primary);font-size:.66rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .profile-link{font-size:.68rem;color:var(--text-muted);font-weight:700;text-decoration:none;}
+        .profile-link:hover{color:var(--primary);text-decoration:underline;}
 
         /* ── Badges ── */
         .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.66rem;font-weight:700;white-space:nowrap;}
@@ -138,6 +152,8 @@
         .act-btn.edit:hover{border-color:#fde68a;background:#fffbeb;color:#d97706;}
         .act-btn.del:hover{border-color:#fecaca;background:#fef2f2;color:var(--danger);}
         .act-btn.eval:hover{border-color:#ddd6fe;background:var(--purple-light);color:var(--purple);}
+        .act-btn.record:hover{border-color:#bfdbfe;background:var(--primary-light);color:var(--primary);}
+        .act-btn.download:hover{border-color:#bbf7d0;background:#ecfdf5;color:#059669;}
 
         .eval-summary{display:grid;gap:10px;text-align:left;margin-top:6px;}
         .eval-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:#f8fafc;}
@@ -173,7 +189,7 @@
         @media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr;}.insight-card{grid-template-columns:1fr;}.insight-metrics{grid-template-columns:1fr;}}
         @media(max-width:768px){
             .sidebar{transform:translateX(-100%);}
-            .main{margin-left:0;}
+            .main{margin-left:0;width:100%;}
             .stats-grid{grid-template-columns:1fr 1fr;}
         }
     </style>
@@ -353,12 +369,13 @@
             </div>
 
             {% if tasks %}
-            <div style="overflow-x:auto;">
+            <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Student</th>
+                            <th>Subject</th>
                             <th>Task</th>
                             <th>Date Created</th>
                             <th>Deadline</th>
@@ -377,18 +394,22 @@
                             <td>
                                 <div class="student-cell">
                                     <div class="s-avatar">
-                                        {% if task.student.profile_picture %}
-                                            <img src="{{ task.student.profile_picture.url }}" alt="{{ task.student.name }}">
-                                        {% else %}
-                                            {{ task.student.name|first|upper }}
-                                        {% endif %}
+                                        {{ task.student.name|name_initials }}
                                     </div>
                                     <div>
-                                        <div class="s-name" title="{{ task.student.name }}">{{ task.student.name }}</div>
+                                        <div class="s-name" title="{{ task.student.name }}">{{ task.student.name|name_initials }}</div>
                                         <a href="{% url 'student_detail' task.student.id %}" class="s-link">
                                             View profile →
                                         </a>
                                     </div>
+                                </div>
+                            </td>
+
+                            <!-- Subject -->
+                            <td>
+                                <div class="subject-cell" title="{% if task.subject %}{{ task.subject.name }}{% else %}No subject{% endif %}">
+                                    <i class="bi bi-journal-bookmark-fill"></i>
+                                    {% if task.subject %}{{ task.subject.name }}{% else %}—{% endif %}
                                 </div>
                             </td>
 
@@ -402,13 +423,13 @@
 
                             <!-- Date Created -->
                             <td style="color:var(--text-muted);white-space:nowrap;">
-                                {{ task.created_at|date:"M d, Y" }}
+                                {{ task.created_at|date:"m/d/y" }}
                             </td>
 
                             <!-- Deadline -->
                             <td style="white-space:nowrap;">
                                 <span style="font-weight:600;{% if task.status != 'completed' and task.deadline < now %}color:var(--danger);{% else %}color:var(--text-muted);{% endif %}">
-                                    {{ task.deadline|date:"M d, Y" }}
+                                    {{ task.deadline|date:"m/d/y" }}
                                 </span>
                             </td>
 
@@ -426,7 +447,7 @@
                             <!-- Completed On -->
                             <td style="color:var(--text-muted);white-space:nowrap;">
                                 {% if task.status == 'completed' %}
-                                    {{ task.completed_at|date:"M d, Y" }}
+                                    {{ task.completed_at|date:"m/d/y" }}
                                 {% else %}—{% endif %}
                             </td>
 
@@ -457,9 +478,19 @@
                                                 '{% if task.evaluation %}{{ task.evaluation.get_feeling_display|escapejs }}{% endif %}',
                                                 '{% if task.evaluation %}{{ task.evaluation.get_participation_display|escapejs }}{% endif %}',
                                                 '{% if task.evaluation %}{{ task.evaluation.submitted_at|date:'M d, Y h:i A'|escapejs }}{% endif %}'
-                                            )">
+                                    )">
                                         <i class="bi bi-clipboard-data-fill"></i>
                                     </button>
+                                    {% with recording=task.recordings.first %}
+                                        {% if recording %}
+                                        <a href="{% url 'task_recording_detail' recording.id %}" class="act-btn record" title="View recording">
+                                            <i class="bi bi-camera-video-fill"></i>
+                                        </a>
+                                        <a href="{% url 'task_recording_download' recording.id %}" class="act-btn download" title="Download recording">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        {% endif %}
+                                    {% endwith %}
                                     <button type="button" class="act-btn del" title="Delete task"
                                             onclick="openDeleteModal('{% url 'delete_task' task.id %}', '{{ task.title|escapejs }}')">
                                         <i class="bi bi-trash-fill"></i>

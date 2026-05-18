@@ -937,7 +937,12 @@ def task_history(request):
     student_filter = request.GET.get('student', '').strip()
 
     now        = timezone.now()
-    base_tasks = _teacher_tasks(request.user).select_related('student', 'evaluation').order_by('-created_at')
+    base_tasks = (
+        _teacher_tasks(request.user)
+        .select_related('student', 'subject', 'evaluation')
+        .prefetch_related('recordings')
+        .order_by('-created_at')
+    )
     stat_tasks = base_tasks
 
     if search_filter:
