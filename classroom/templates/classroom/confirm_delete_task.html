@@ -29,6 +29,9 @@
             <p class="text-muted mb-4" style="font-size:0.9rem;">Assigned to: {{ student.name }}</p>
             <form method="POST">
                 {% csrf_token %}
+                {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
                 <a href="{% url 'student_detail' student.id %}" class="btn btn-secondary me-2">Cancel</a>
                 <button type="submit" class="btn btn-danger">Yes, Delete Task</button>
             </form>

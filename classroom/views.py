@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.http import FileResponse, JsonResponse
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
 from .models import (
     Student, UserProfile, Task,
@@ -338,14 +338,19 @@ def add_student(request):
             return render(request, 'classroom/add_student.html', {'form': form})
         if form.is_valid():
             email = request.POST.get('email', '').strip()
-            user  = User.objects.create_user(username=username, email=email, password=password)
-            UserProfile.objects.create(user=user, role='student')
-            student = form.save(commit=False)
-            student.user             = user
-            student.assigned_teacher = request.user
-            student.grading_type     = grading_type
-            student.save()
-            form.save_m2m()
+            try:
+                with transaction.atomic():
+                    user  = User.objects.create_user(username=username, email=email, password=password)
+                    UserProfile.objects.create(user=user, role='student')
+                    student = form.save(commit=False)
+                    student.user             = user
+                    student.assigned_teacher = request.user
+                    student.grading_type     = grading_type
+                    student.save()
+                    form.save_m2m()
+            except IntegrityError:
+                messages.error(request, "That username or LRN is already in use. Please choose unique values.")
+                return render(request, 'classroom/add_student.html', {'form': form})
             messages.success(request, f"Student '{student.name}' added successfully!")
             return redirect('student_list')
         else:
@@ -570,14 +575,18 @@ def delete_task(request, task_id):
         return redirect('login')
     task       = get_object_or_404(_teacher_tasks(request.user), id=task_id)
     student_id = task.student.id
-    next_url   = request.POST.get('next', '')
+    next_url   = request.POST.get('next') or request.GET.get('next', '')
     if request.method == 'POST':
         task.delete()
         messages.success(request, "Task deleted successfully!")
         if next_url == 'task_history':
             return redirect('task_history')
         return redirect('student_detail', id=student_id)
-    return render(request, 'classroom/confirm_delete_task.html', {'task': task, 'student': task.student})
+    return render(request, 'classroom/confirm_delete_task.html', {
+        'task': task,
+        'student': task.student,
+        'next': next_url,
+    })
 
 
 @login_required(login_url='/login/')
@@ -776,7 +785,11 @@ def admin_delete_user(request, id):
         return redirect('login')
     delete_profile = get_object_or_404(UserProfile, id=id)
     if request.method == 'POST':
-        delete_profile.user.delete()
+        user_to_delete = delete_profile.user
+        with transaction.atomic():
+            if delete_profile.role == 'student':
+                Student.objects.filter(user=user_to_delete).delete()
+            user_to_delete.delete()
         messages.success(request, "User deleted successfully!")
         return redirect('admin_user_list')
     return render(request, 'classroom/admin_confirm_delete.html', {'profile': delete_profile})

@@ -117,20 +117,22 @@
         tbody tr{border-bottom:1px solid #f1f5f9;transition:background .12s;}
         tbody tr:hover{background:#f8fafc;}
         tbody tr:last-child{border-bottom:none;}
-        tbody td{padding:11px 16px;font-size:.81rem;vertical-align:middle;}
+        tbody td{padding:16px 16px;font-size:.81rem;vertical-align:middle;}
 
         /* ── Student Cell ── */
-        .student-cell{display:flex;align-items:center;gap:9px;}
-        .s-avatar{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.3px;flex-shrink:0;overflow:hidden;box-shadow:0 8px 18px rgba(37,99,235,.16);}
+        .student-cell{display:flex;align-items:center;gap:11px;min-width:150px;}
+        .s-avatar{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.3px;flex-shrink:0;overflow:hidden;box-shadow:0 10px 22px rgba(37,99,235,.18);}
         .s-avatar img{width:100%;height:100%;object-fit:cover;}
-        .s-name{font-weight:800;color:var(--text);white-space:nowrap;letter-spacing:.4px;}
-        .s-link{font-size:.7rem;color:var(--primary);text-decoration:none;font-weight:600;}
+        .s-profile-wrap{display:flex;flex-direction:column;gap:2px;min-width:0;}
+        .s-name-link{display:block;max-width:140px;font-size:.82rem;color:var(--text);text-decoration:none;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .s-name-link:hover{color:var(--primary);text-decoration:underline;}
+        .s-link{font-size:.72rem;color:var(--primary);text-decoration:none;font-weight:800;white-space:nowrap;}
         .s-link:hover{text-decoration:underline;}
 
         /* ── Task cell ── */
         .task-title-cell{font-weight:700;color:var(--text);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .task-desc-cell{font-size:.7rem;color:var(--text-muted);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .subject-cell{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;color:var(--primary);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;background:var(--primary-light);border-radius:999px;padding:4px 9px;}
+        .subject-cell{--subject-color:var(--primary);display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:800;color:var(--subject-color);white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis;background:color-mix(in srgb,var(--subject-color) 11%,white);border:1px solid color-mix(in srgb,var(--subject-color) 20%,white);border-radius:999px;padding:5px 10px;box-shadow:0 6px 14px color-mix(in srgb,var(--subject-color) 9%,transparent);}
         .task-main-cell{display:flex;align-items:center;gap:12px;min-width:0;}
         .student-initials{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.78rem;letter-spacing:.3px;flex-shrink:0;box-shadow:0 8px 18px rgba(37,99,235,.18);}
         .task-main-cell .task-title-cell{max-width:260px;font-weight:800;}
@@ -211,6 +213,7 @@
         <div class="nav-label">Management</div>
         <a href="{% url 'student_list' %}" class="nav-item"><i class="bi bi-people-fill"></i> Students</a>
         <a href="{% url 'add_student' %}" class="nav-item"><i class="bi bi-person-plus-fill"></i> Add Student</a>
+        <a href="{% url 'subject_list' %}" class="nav-item"><i class="bi bi-journal-bookmark-fill"></i> Subjects</a>
         <a href="{% url 'teacher_feedback' %}" class="nav-item"><i class="bi bi-chat-quote-fill"></i> Teacher Feedback</a>
         <div class="nav-label">Tasks</div>
         <a href="{% url 'assign_task' %}" class="nav-item"><i class="bi bi-clipboard-plus-fill"></i> Assign Task</a>
@@ -393,13 +396,16 @@
                             <!-- Student -->
                             <td>
                                 <div class="student-cell">
-                                    <div class="s-avatar">
-                                        {{ task.student.name|name_initials }}
+                                    <div class="s-avatar" title="{{ task.student.name }}">
+                                        {% if task.student.profile_picture %}
+                                            <img src="{{ task.student.profile_picture.url }}" alt="{{ task.student.name }}">
+                                        {% else %}
+                                            {{ task.student.name|name_initials }}
+                                        {% endif %}
                                     </div>
-                                    <div>
-                                        <div class="s-name" title="{{ task.student.name }}">{{ task.student.name|name_initials }}</div>
-                                        <a href="{% url 'student_detail' task.student.id %}" class="s-link">
-                                            View profile →
+                                    <div class="s-profile-wrap">
+                                        <a href="{% url 'student_detail' task.student.id %}" class="s-name-link" title="{{ task.student.name }}">
+                                            {{ task.student.name }}
                                         </a>
                                     </div>
                                 </div>
@@ -407,9 +413,11 @@
 
                             <!-- Subject -->
                             <td>
-                                <div class="subject-cell" title="{% if task.subject %}{{ task.subject.name }}{% else %}No subject{% endif %}">
+                                <div class="subject-cell"
+                                     {% if task.subject %}style="--subject-color:{{ task.subject.color }};"{% endif %}
+                                     title="{% if task.subject %}{{ task.subject.name }}{% else %}No subject{% endif %}">
                                     <i class="bi bi-journal-bookmark-fill"></i>
-                                    {% if task.subject %}{{ task.subject.name }}{% else %}—{% endif %}
+                                    {% if task.subject %}{{ task.subject.name }}{% else %}-{% endif %}
                                 </div>
                             </td>
 
@@ -491,8 +499,8 @@
                                         </a>
                                         {% endif %}
                                     {% endwith %}
-                                    <button type="button" class="act-btn del" title="Delete task"
-                                            onclick="openDeleteModal('{% url 'delete_task' task.id %}', '{{ task.title|escapejs }}')">
+                                        <button type="button" class="act-btn del" title="Delete task"
+                                            onclick="openDeleteModal('{% url 'delete_task' task.id %}', '{{ task.title|escapejs }}', 'task_history')">
                                         <i class="bi bi-trash-fill"></i>
                                     </button>
                                 </div>
@@ -573,10 +581,14 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function openDeleteModal(url, name) {
+    function openDeleteModal(url, name, next) {
         document.getElementById('deleteMsg').textContent =
             'Are you sure you want to delete "' + name + '"? This cannot be undone.';
-        document.getElementById('deleteForm').action = url;
+        var actionUrl = url;
+        if (next) {
+            actionUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 'next=' + encodeURIComponent(next);
+        }
+        document.getElementById('deleteForm').action = actionUrl;
         document.getElementById('deleteModal').classList.add('show');
     }
     function closeDeleteModal() {

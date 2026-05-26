@@ -115,6 +115,20 @@ class StudentForm(forms.ModelForm):
     def clean_progress_communication(self):
         return self.cleaned_data.get('progress_communication') or 0
 
+    def clean_lrn(self):
+        lrn = (self.cleaned_data.get('lrn') or '').strip()
+        if not lrn:
+            return None
+        if not lrn.isdigit():
+            raise forms.ValidationError("LRN must contain numbers only.")
+
+        duplicate_students = Student.objects.filter(lrn=lrn)
+        if self.instance and self.instance.pk:
+            duplicate_students = duplicate_students.exclude(pk=self.instance.pk)
+        if duplicate_students.exists():
+            raise forms.ValidationError("This LRN is already assigned to another student.")
+        return lrn
+
     def clean_progress_motor(self):
         return self.cleaned_data.get('progress_motor') or 0
 
